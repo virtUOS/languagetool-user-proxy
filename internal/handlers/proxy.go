@@ -55,6 +55,12 @@ func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.URL.Path = "/" + r.URL.Path
 	}
 
+	// Only allow /v2/ paths to be proxied
+	if !strings.HasPrefix(r.URL.Path, "/v2/") {
+		http.NotFound(w, r)
+		return
+	}
+
 	// Set X-Forwarded headers
 	proxy.ServeHTTP(w, r)
 }

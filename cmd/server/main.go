@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/joho/godotenv"
 
 	"github.com/virtuos/languagetool-user-proxy/internal/apikey"
 	"github.com/virtuos/languagetool-user-proxy/internal/config"
@@ -22,6 +23,11 @@ import (
 )
 
 func main() {
+	// Load .env file (optional - won't error if not found)
+	if err := godotenv.Load(); err != nil {
+		log.Println("Info: No .env file found, using environment variables")
+	}
+
 	// Load configuration
 	cfg := config.Load()
 

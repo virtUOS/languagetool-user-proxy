@@ -18,7 +18,18 @@ A fast and lightweight HTTP proxy for LanguageTool with OIDC authentication and 
 go build -o languagetool-proxy ./cmd/server
 ```
 
-### 2. Set environment variables
+### 2. Configure
+
+#### Option A: Using a `.env` file (Recommended)
+
+Copy the example file and fill in your values:
+
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+#### Option B: Using environment variables
 
 ```bash
 export PORT=8080
@@ -32,11 +43,15 @@ export SESSION_DURATION_HOURS=24
 export COOKIE_SECRET=your-random-secret-key
 ```
 
+**Note**: Environment variables take precedence over `.env` file values.
+
 ### 3. Run the server
 
 ```bash
 ./languagetool-proxy
 ```
+
+The server will automatically load the `.env` file if it exists in the current directory.
 
 ## Configuration
 

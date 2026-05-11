@@ -70,7 +70,8 @@ func (p *Provider) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		MaxAge:   300,
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
 	})
 
 	authURL := p.OIDCConfig.AuthCodeURL(state)

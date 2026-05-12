@@ -41,21 +41,27 @@ type Config struct {
 
 	// Cookie
 	CookieSecret string
+
+	// UI Accent Colors
+	UIAccentColorStart string
+	UIAccentColorEnd   string
 }
 
 // Load reads configuration from environment variables
 func Load() *Config {
 	return &Config{
-		Port:             getEnv("PORT", "8080"),
-		DatabasePath:     getEnv("DATABASE_PATH", "./data/languagetool.db"),
-		OIDCIssuerURL:    getEnv("OIDC_ISSUER_URL", ""),
-		OIDCClientID:     getEnv("OIDC_CLIENT_ID", ""),
-		OIDCClientSecret: getEnv("OIDC_CLIENT_SECRET", ""),
-		OIDCRedirectURI:  getEnv("OIDC_REDIRECT_URI", ""),
-		OIDCScope:        getEnv("OIDC_SCOPE", "openid profile email"),
-		BackendURL:       getEnv("BACKEND_URL", "http://localhost:8080"),
-		SessionDuration:  time.Duration(getEnvDuration("SESSION_DURATION_HOURS", 24)) * time.Hour,
-		CookieSecret:     getEnv("COOKIE_SECRET", generateRandomSecret()),
+		Port:               getEnv("PORT", "8080"),
+		DatabasePath:       getEnv("DATABASE_PATH", "./data/languagetool.db"),
+		OIDCIssuerURL:      getEnv("OIDC_ISSUER_URL", ""),
+		OIDCClientID:       getEnv("OIDC_CLIENT_ID", ""),
+		OIDCClientSecret:   getEnv("OIDC_CLIENT_SECRET", ""),
+		OIDCRedirectURI:    getEnv("OIDC_REDIRECT_URI", ""),
+		OIDCScope:          getEnv("OIDC_SCOPE", "openid profile email"),
+		BackendURL:         getEnv("BACKEND_URL", "http://localhost:8080"),
+		SessionDuration:    time.Duration(getEnvDuration("SESSION_DURATION_HOURS", 24)) * time.Hour,
+		CookieSecret:       getEnv("COOKIE_SECRET", generateRandomSecret()),
+		UIAccentColorStart: getEnv("UI_ACCENT_COLOR_START", "#667eea"),
+		UIAccentColorEnd:   getEnv("UI_ACCENT_COLOR_END", "#764ba2"),
 	}
 }
 

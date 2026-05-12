@@ -70,7 +70,7 @@ func main() {
 	apiKeyManager := apikey.NewManager(queries)
 
 	// Initialize handlers
-	uiHandler := handlers.NewUIHandler(oidcProvider, sessionManager, apiKeyManager)
+	uiHandler := handlers.NewUIHandler(oidcProvider, sessionManager, apiKeyManager, cfg)
 	proxyHandler, err := handlers.NewProxyHandler(cfg.BackendURL, apiKeyManager)
 	if err != nil {
 		log.Fatalf("Failed to create proxy handler: %v", err)

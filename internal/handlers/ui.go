@@ -7,27 +7,34 @@ import (
 	"net/http"
 
 	"github.com/virtuos/languagetool-user-proxy/internal/apikey"
+	"github.com/virtuos/languagetool-user-proxy/internal/config"
 	"github.com/virtuos/languagetool-user-proxy/internal/oidc"
 	"github.com/virtuos/languagetool-user-proxy/internal/session"
 )
 
 type UIHandler struct {
-	OIDCProvider   *oidc.Provider
-	SessionManager *session.Manager
-	APIKeyManager  *apikey.Manager
+	OIDCProvider     *oidc.Provider
+	SessionManager   *session.Manager
+	APIKeyManager    *apikey.Manager
+	AccentColorStart string
+	AccentColorEnd   string
 }
 
 type DashboardData struct {
-	APIKey     string
-	HasAPIKey  bool
-	RegenError string
+	APIKey           string
+	HasAPIKey        bool
+	RegenError       string
+	AccentColorStart string
+	AccentColorEnd   string
 }
 
-func NewUIHandler(oidcProvider *oidc.Provider, sessionManager *session.Manager, apiKeyManager *apikey.Manager) *UIHandler {
+func NewUIHandler(oidcProvider *oidc.Provider, sessionManager *session.Manager, apiKeyManager *apikey.Manager, cfg *config.Config) *UIHandler {
 	return &UIHandler{
-		OIDCProvider:   oidcProvider,
-		SessionManager: sessionManager,
-		APIKeyManager:  apiKeyManager,
+		OIDCProvider:     oidcProvider,
+		SessionManager:   sessionManager,
+		APIKeyManager:    apiKeyManager,
+		AccentColorStart: cfg.UIAccentColorStart,
+		AccentColorEnd:   cfg.UIAccentColorEnd,
 	}
 }
 
@@ -53,8 +60,10 @@ func (h *UIHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := DashboardData{
-		APIKey:    apiKey,
-		HasAPIKey: apiKey != "",
+		APIKey:           apiKey,
+		HasAPIKey:        apiKey != "",
+		AccentColorStart: h.AccentColorStart,
+		AccentColorEnd:   h.AccentColorEnd,
 	}
 
 	tmpl := template.Must(template.New("dashboard").Parse(dashboardHTML))
@@ -119,7 +128,7 @@ const dashboardHTML = `<!DOCTYPE html>
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, {{.AccentColorStart}} 0%, {{.AccentColorEnd}} 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -186,12 +195,12 @@ const dashboardHTML = `<!DOCTYPE html>
             transition: all 0.2s;
         }
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, {{.AccentColorStart}} 0%, {{.AccentColorEnd}} 100%);
             color: white;
         }
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px {{.AccentColorStart}}cc;
         }
         .btn-secondary {
             background: #f0f0f0;
@@ -209,18 +218,18 @@ const dashboardHTML = `<!DOCTYPE html>
         }
         .info-box {
             background: #e8f4fd;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid {{.AccentColorStart}};
             padding: 15px;
             margin-bottom: 20px;
             border-radius: 4px;
         }
         .info-box p {
-            color: #2980b9;
+            color: {{.AccentColorStart}};
             font-size: 14px;
             line-height: 1.5;
         }
         .info-box code {
-            background: rgba(52, 152, 219, 0.1);
+            background: {{.AccentColorStart}}1a;
             padding: 2px 6px;
             border-radius: 3px;
             font-family: 'Courier New', monospace;

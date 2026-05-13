@@ -16,6 +16,7 @@ var (
 	ErrMissingOIDCClientSecret = errors.New("OIDC_CLIENT_SECRET is required")
 	ErrMissingOIDCRedirectURI  = errors.New("OIDC_REDIRECT_URI is required")
 	ErrMissingBackendURL       = errors.New("BACKEND_URL is required")
+	ErrMissingFrontendURL      = errors.New("FRONTEND_URL is required")
 )
 
 // Config holds all configuration for the application
@@ -36,6 +37,9 @@ type Config struct {
 
 	// Backend
 	BackendURL string
+
+	// Frontend
+	FrontendURL string
 
 	// Session
 	SessionDuration time.Duration
@@ -60,6 +64,7 @@ func Load() *Config {
 		OIDCRedirectURI:    getEnv("OIDC_REDIRECT_URI", ""),
 		OIDCScope:          getEnv("OIDC_SCOPE", "openid profile email"),
 		BackendURL:         getEnv("BACKEND_URL", "http://localhost:8080"),
+		FrontendURL:        getEnv("FRONTEND_URL", "https://languagetool.example.com"),
 		SessionDuration:    time.Duration(getEnvDuration("SESSION_DURATION_HOURS", 24)) * time.Hour,
 		CookieSecret:       getEnv("COOKIE_SECRET", generateRandomSecret()),
 		UIAccentColorStart: getEnv("UI_ACCENT_COLOR_START", "#667eea"),
@@ -83,6 +88,9 @@ func (c *Config) Validate() error {
 	}
 	if c.BackendURL == "" {
 		return ErrMissingBackendURL
+	}
+	if c.FrontendURL == "" {
+		return ErrMissingFrontendURL
 	}
 	return nil
 }

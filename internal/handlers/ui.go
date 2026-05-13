@@ -18,6 +18,7 @@ type UIHandler struct {
 	APIKeyManager    *apikey.Manager
 	AccentColorStart string
 	AccentColorEnd   string
+	FrontendURL      string
 }
 
 type DashboardData struct {
@@ -26,6 +27,7 @@ type DashboardData struct {
 	RegenError       string
 	AccentColorStart string
 	AccentColorEnd   string
+	FrontendURL      string
 }
 
 func NewUIHandler(oidcProvider *oidc.Provider, sessionManager *session.Manager, apiKeyManager *apikey.Manager, cfg *config.Config) *UIHandler {
@@ -35,6 +37,7 @@ func NewUIHandler(oidcProvider *oidc.Provider, sessionManager *session.Manager, 
 		APIKeyManager:    apiKeyManager,
 		AccentColorStart: cfg.UIAccentColorStart,
 		AccentColorEnd:   cfg.UIAccentColorEnd,
+		FrontendURL:      cfg.FrontendURL,
 	}
 }
 
@@ -64,6 +67,7 @@ func (h *UIHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 		HasAPIKey:        apiKey != "",
 		AccentColorStart: h.AccentColorStart,
 		AccentColorEnd:   h.AccentColorEnd,
+		FrontendURL:      h.FrontendURL,
 	}
 
 	tmpl := template.Must(template.New("dashboard").Parse(dashboardHTML))
@@ -294,7 +298,7 @@ const dashboardHTML = `<!DOCTYPE html>
 
         <div class="info-box">
             <p>Your API endpoint:<br>
-            <code>https://your-domain.com/{{.APIKey}}/v2/check</code></p>
+            <code>{{.FrontendURL}}/{{.APIKey}}/v2/check</code></p>
         </div>
 
         <div class="api-key-section">

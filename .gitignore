@@ -1,4 +1,5 @@
-server
+/server
 .prompts
 .env
+*.swp
 languagetool.db

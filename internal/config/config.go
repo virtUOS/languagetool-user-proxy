@@ -23,7 +23,7 @@ var (
 type Config struct {
 	// Server
 	ListenAddress string
-	Port          string
+	ListenPort    string
 
 	// Database
 	DatabasePath string
@@ -56,7 +56,7 @@ type Config struct {
 func Load() *Config {
 	return &Config{
 		ListenAddress:      getEnv("LISTEN_ADDRESS", "127.0.0.1"),
-		Port:               getEnv("PORT", "8080"),
+		ListenPort:         getEnv("LISTEN_PORT", "8080"),
 		DatabasePath:       getEnv("DATABASE_PATH", "./data/languagetool.db"),
 		OIDCIssuerURL:      getEnv("OIDC_ISSUER_URL", ""),
 		OIDCClientID:       getEnv("OIDC_CLIENT_ID", ""),

@@ -20,30 +20,12 @@ go build -o languagetool-proxy ./cmd/server
 
 ### 2. Configure
 
-#### Option A: Using a `.env` file (Recommended)
-
-Copy the example file and fill in your values:
+Copy the example file and fill in your values.
+The example file contains detailed descriptions of all configuration options.
 
 ```bash
 cp .env.example .env
-# Edit .env with your configuration
 ```
-
-#### Option B: Using environment variables
-
-```bash
-export PORT=8080
-export DATABASE_PATH=./data/languagetool.db
-export OIDC_ISSUER_URL=https://your-keycloak.example.com/realms/yourrealm
-export OIDC_CLIENT_ID=languagetool-proxy
-export OIDC_CLIENT_SECRET=your-client-secret
-export OIDC_REDIRECT_URI=https://your-domain.com/callback
-export BACKEND_URL=http://localhost:8080
-export SESSION_DURATION_HOURS=24
-export COOKIE_SECRET=your-random-secret-key
-```
-
-**Note**: Environment variables take precedence over `.env` file values.
 
 ### 3. Run the server
 
@@ -52,21 +34,6 @@ export COOKIE_SECRET=your-random-secret-key
 ```
 
 The server will automatically load the `.env` file if it exists in the current directory.
-
-## Configuration
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `PORT` | No | `8080` | Server port |
-| `DATABASE_PATH` | No | `./data/languagetool.db` | SQLite database path |
-| `OIDC_ISSUER_URL` | Yes | - | OIDC provider issuer URL |
-| `OIDC_CLIENT_ID` | Yes | - | OIDC client ID |
-| `OIDC_CLIENT_SECRET` | Yes | - | OIDC client secret |
-| `OIDC_REDIRECT_URI` | Yes | - | Callback URL for OIDC |
-| `OIDC_SCOPE` | No | `openid profile email` | OIDC scopes |
-| `BACKEND_URL` | Yes | - | LanguageTool backend URL |
-| `SESSION_DURATION_HOURS` | No | `24` | Session duration in hours |
-| `COOKIE_SECRET` | No | (auto-generated) | Secret for cookie encryption |
 
 ## Usage
 
@@ -85,6 +52,7 @@ https://your-proxy-domain.com/{API_KEY}/v2/check
 ```
 
 Example:
+
 ```
 https://proxy.example.com/a1b2c3d4e5f6.../v2/check
 ```

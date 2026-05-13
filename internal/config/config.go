@@ -21,7 +21,8 @@ var (
 // Config holds all configuration for the application
 type Config struct {
 	// Server
-	Port string
+	ListenAddress string
+	Port          string
 
 	// Database
 	DatabasePath string
@@ -50,6 +51,7 @@ type Config struct {
 // Load reads configuration from environment variables
 func Load() *Config {
 	return &Config{
+		ListenAddress:      getEnv("LISTEN_ADDRESS", "127.0.0.1"),
 		Port:               getEnv("PORT", "8080"),
 		DatabasePath:       getEnv("DATABASE_PATH", "./data/languagetool.db"),
 		OIDCIssuerURL:      getEnv("OIDC_ISSUER_URL", ""),

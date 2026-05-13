@@ -127,7 +127,7 @@ func main() {
 
 	// Create server
 	server := &http.Server{
-		Addr:         ":" + cfg.Port,
+		Addr:         cfg.ListenAddress + ":" + cfg.Port,
 		Handler:      r,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -146,7 +146,7 @@ func main() {
 		server.Shutdown(ctx)
 	}()
 
-	log.Printf("Starting server on :%s", cfg.Port)
+	log.Printf("Starting server on http://%s:%s", cfg.ListenAddress, cfg.Port)
 	log.Printf("Backend URL: %s", cfg.BackendURL)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Server error: %v", err)

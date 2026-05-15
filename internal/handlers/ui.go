@@ -298,7 +298,7 @@ const dashboardHTML = `<!DOCTYPE html>
 
         <div class="info-box">
             <p>Your API endpoint:<br>
-            <code>{{.FrontendURL}}/{{.APIKey}}/v2/check</code></p>
+            <code>{{.FrontendURL}}/{{.APIKey}}/v2/</code></p>
         </div>
 
         <div class="api-key-section">

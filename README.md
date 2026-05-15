@@ -48,13 +48,16 @@ The server will automatically load the `.env` file if it exists in the current d
 ### API Endpoint Format
 
 ```
-https://your-proxy-domain.com/{API_KEY}/v2/check
+https://your-proxy-domain.com/{API_KEY}/v2/
 ```
 
-Example:
+You can use cURL to test the API:
 
-```
-https://proxy.example.com/a1b2c3d4e5f6.../v2/check
+```sh
+curl -si \
+  -d "language=en-US" \
+  -d "text=a simple test" \
+  https://proxy.example.com/a1b2c3d4e5f6.../v2/check
 ```
 
 ### API Key Regeneration

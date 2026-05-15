@@ -301,7 +301,11 @@ const dashboardHTML = `<!DOCTYPE html>
 
         <div class="info-box">
             Your personal API endpoint:
-            <code id="endpointDisplay">{{.FrontendURL}}/{{.APIKey}}/v2/</code>
+            {{if .HasAPIKey}}
+                <code id="endpointDisplay">{{.FrontendURL}}/{{.APIKey}}/v2/</code>
+            {{else}}
+                <code id="endpointDisplay">No API key generated yet</code>
+            {{end}}
         </div>
     </div>
 

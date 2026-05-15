@@ -106,9 +106,9 @@ func main() {
 		}
 
 		// Create or get API key for user
-		_, err = apiKeyManager.GetOrCreateAPIKey(ctx, user.ID)
+		_, err = apiKeyManager.GetAPIKeyByUserID(ctx, user.ID)
 		if err != nil {
-			log.Printf("Failed to get/create API key: %v", err)
+			log.Printf("Failed to get API key: %v", err)
 		}
 
 		// Create session

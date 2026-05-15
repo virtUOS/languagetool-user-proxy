@@ -43,19 +43,12 @@ func NewManager(queries *queries.Queries) *Manager {
 	}
 }
 
-func (m *Manager) GetOrCreateAPIKey(ctx context.Context, userID int64) (string, error) {
-	key, err := m.GetAPIKeyByUserID(ctx, userID)
-	if err == nil && key != "" {
-		return key, nil
-	}
-
-	return m.RegenerateAPIKey(ctx, userID)
-}
-
 func (m *Manager) GetAPIKeyByUserID(ctx context.Context, userID int64) (string, error) {
 	apiKey, err := m.Queries.GetAPIKeyByUserID(ctx, userID)
+
+	// Return empty string if there is no API key yet
 	if err != nil {
-		return "", err
+		return "", nil
 	}
 
 	// We only store the hash, so we need to return a placeholder
@@ -64,7 +57,7 @@ func (m *Manager) GetAPIKeyByUserID(ctx context.Context, userID int64) (string, 
 }
 
 func (m *Manager) RegenerateAPIKey(ctx context.Context, userID int64) (string, error) {
-	// Delete existing key
+	// Delete existing key (placeholder or real)
 	existingKey, err := m.Queries.GetAPIKeyByUserID(ctx, userID)
 	if err == nil {
 		m.Queries.DeleteAPIKey(ctx, existingKey.ID)

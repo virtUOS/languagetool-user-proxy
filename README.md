@@ -71,11 +71,11 @@ curl -si \
 
 ```
 ┌─────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   Browser   │────▶│  LanguageTool    │────▶│  LanguageTool   │
+│   Browser   │────▸│  LanguageTool    │────▸│  LanguageTool   │
 │             │     │  User Proxy      │     │  Backend        │
 └─────────────┘     └──────────────────┘     └─────────────────┘
                             │
-                            ▼
+                            ▾
                     ┌──────────────────┐
                     │   SQLite DB      │
                     │  (users, keys)   │

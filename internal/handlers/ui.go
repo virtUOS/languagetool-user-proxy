@@ -392,6 +392,9 @@ const dashboardHTML = `<!DOCTYPE html>
                 // Update endpoint display with full key
                 const endpoint = '{{.FrontendURL}}/' + data.key + '/v2/';
                 document.getElementById('endpointDisplay').textContent = endpoint;
+
+                // Show warning alert
+                alert('IMPORTANT: Please copy your API key and endpoint now! They will only be shown this one time.');
             })
             .catch(error => {
                 alert('Failed to regenerate key: ' + error);

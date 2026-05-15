@@ -160,37 +160,12 @@ const dashboardHTML = `<!DOCTYPE html>
             margin-bottom: 30px;
             font-size: 14px;
         }
-        .api-key-section {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .api-key-label {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-        .api-key {
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            color: #333;
-            word-break: break-all;
-            background: white;
-            padding: 12px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-        .no-key {
-            color: #999;
-            font-style: italic;
-        }
         .button-group {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px;
         }
         button {
             padding: 12px 24px;
@@ -232,14 +207,23 @@ const dashboardHTML = `<!DOCTYPE html>
         .btn-logout:hover {
             background: #e0e0e0;
         }
+        .user-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .user-bar-text {
+            color: #333;
+            font-size: 14px;
+            margin-right: 12px;
+        }
         .info-box {
             background: #e8f4fd;
             border-left: 4px solid {{.AccentColorStart}};
             padding: 15px;
             margin-bottom: 20px;
             border-radius: 4px;
-        }
-        .info-box p {
             color: {{.AccentColorStart}};
             font-size: 14px;
             line-height: 1.5;
@@ -249,6 +233,8 @@ const dashboardHTML = `<!DOCTYPE html>
             padding: 2px 6px;
             border-radius: 3px;
             font-family: 'Courier New', monospace;
+            word-break: break-all;
+            display: block;
         }
         .error {
             background: #fdeaea;
@@ -260,46 +246,6 @@ const dashboardHTML = `<!DOCTYPE html>
         .error p {
             color: #c0392b;
             font-size: 14px;
-        }
-        .new-key-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .new-key-modal.active {
-            display: flex;
-        }
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-        }
-        .modal-content h2 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-        .modal-content .new-key {
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            word-break: break-all;
-            margin: 15px 0;
-        }
-        .modal-content .warning {
-            color: #e74c3c;
-            font-size: 13px;
-            margin-bottom: 20px;
         }
         .user-bar {
             display: flex;
@@ -324,11 +270,6 @@ const dashboardHTML = `<!DOCTYPE html>
             font-size: 24px;
             text-align: center;
         }
-        .header-subtitle {
-            color: #666;
-            font-size: 13px;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -342,43 +283,34 @@ const dashboardHTML = `<!DOCTYPE html>
         <div class="header">
             <div>
                 <h1 class="header-title">LanguageTool Proxy</h1>
-                <p class="header-subtitle">Your personal API endpoint</p>
             </div>
         </div>
 
         <div class="info-box">
-            <p>Your API endpoint:<br>
-            <code>{{.FrontendURL}}/{{.APIKey}}/v2/</code></p>
-        </div>
-
-        <div class="api-key-section">
-            <div class="api-key-label">Your API Key</div>
+            Your API Key:
             {{if .HasAPIKey}}
-                <div class="api-key">{{.APIKey}}</div>
+                <code id="apiKeyDisplay">{{.APIKey}}</code>
             {{else}}
-                <div class="api-key no-key">No API key generated yet</div>
+                <code id="apiKeyDisplay">No API key generated yet</code>
             {{end}}
         </div>
 
         <div class="button-group">
-            <button class="btn-primary" onclick="showRegenerateModal()">Regenerate API Key</button>
+            <button class="btn-primary" id="regenerateBtn" onclick="handleRegenerate()">Generate new API key</button>
         </div>
-    </div>
 
-    <div class="new-key-modal" id="regenModal">
-        <div class="modal-content">
-            <h2>Generate New API Key</h2>
-            <p class="warning">⚠️ Your old API key will be invalidated immediately. Make sure to update your applications with the new key.</p>
-            <div class="new-key" id="newKeyDisplay"></div>
-            <div class="button-group">
-                <button class="btn-primary" onclick="copyKey()">Copy to Clipboard</button>
-                <button class="btn-secondary" onclick="closeModal()">Close</button>
-            </div>
+        <div class="info-box">
+            Your personal API endpoint:
+            <code id="endpointDisplay">{{.FrontendURL}}/{{.APIKey}}/v2/</code>
         </div>
     </div>
 
     <script>
-        function showRegenerateModal() {
+        function handleRegenerate() {
+            if (!confirm('Generating a new API key will invalidate your current key. Continue?')) {
+                return;
+            }
+
             fetch('/regenerate-key', {
                 method: 'POST',
                 headers: {
@@ -387,30 +319,16 @@ const dashboardHTML = `<!DOCTYPE html>
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('newKeyDisplay').textContent = data.key;
-                document.getElementById('regenModal').classList.add('active');
+                // Update API key display with full key
+                document.getElementById('apiKeyDisplay').textContent = data.key;
+                // Update endpoint display with full key
+                const endpoint = '{{.FrontendURL}}/' + data.key + '/v2/';
+                document.getElementById('endpointDisplay').textContent = endpoint;
             })
             .catch(error => {
                 alert('Failed to regenerate key: ' + error);
             });
         }
-
-        function closeModal() {
-            document.getElementById('regenModal').classList.remove('active');
-        }
-
-        function copyKey() {
-            const key = document.getElementById('newKeyDisplay').textContent;
-            navigator.clipboard.writeText(key).then(() => {
-                alert('API key copied to clipboard!');
-            });
-        }
-
-        document.getElementById('regenModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
     </script>
 </body>
 </html>`

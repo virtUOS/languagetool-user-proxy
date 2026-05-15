@@ -19,6 +19,12 @@ type Manager struct {
 	CookieSecret    string
 }
 
+// SessionWithUser contains session data along with the associated user information
+type SessionWithUser struct {
+	Session queries.Session
+	User    queries.User
+}
+
 func NewManager(queries *queries.Queries, duration time.Duration, secret string) *Manager {
 	return &Manager{
 		Queries:         queries,
@@ -51,7 +57,7 @@ func (m *Manager) CreateSession(ctx context.Context, userID int64) (string, erro
 	return token, nil
 }
 
-func (m *Manager) GetSessionByToken(ctx context.Context, token string) (*queries.Session, error) {
+func (m *Manager) GetSessionByToken(ctx context.Context, token string) (*SessionWithUser, error) {
 	session, err := m.Queries.GetSessionByToken(ctx, token)
 	if err != nil {
 		return nil, err
@@ -62,7 +68,16 @@ func (m *Manager) GetSessionByToken(ctx context.Context, token string) (*queries
 		return nil, fmt.Errorf("session expired")
 	}
 
-	return &session, nil
+	// Fetch user data
+	user, err := m.Queries.GetUserByID(ctx, session.UserID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch user: %w", err)
+	}
+
+	return &SessionWithUser{
+		Session: session,
+		User:    user,
+	}, nil
 }
 
 func (m *Manager) DeleteSession(ctx context.Context, sessionID int64) error {

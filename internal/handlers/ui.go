@@ -25,6 +25,7 @@ type DashboardData struct {
 	APIKey           string
 	HasAPIKey        bool
 	RegenError       string
+	Username         string
 	AccentColorStart string
 	AccentColorEnd   string
 	FrontendURL      string
@@ -57,7 +58,7 @@ func (h *UIHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apiKey, err := h.APIKeyManager.GetAPIKeyByUserID(ctx, sess.UserID)
+	apiKey, err := h.APIKeyManager.GetAPIKeyByUserID(ctx, sess.Session.UserID)
 	if err != nil {
 		apiKey = ""
 	}
@@ -65,6 +66,7 @@ func (h *UIHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 	data := DashboardData{
 		APIKey:           apiKey,
 		HasAPIKey:        apiKey != "",
+		Username:         sess.User.Name.String,
 		AccentColorStart: h.AccentColorStart,
 		AccentColorEnd:   h.AccentColorEnd,
 		FrontendURL:      h.FrontendURL,
@@ -95,7 +97,7 @@ func (h *UIHandler) RegenerateKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newKey, err := h.APIKeyManager.RegenerateAPIKey(ctx, sess.UserID)
+	newKey, err := h.APIKeyManager.RegenerateAPIKey(ctx, sess.Session.UserID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to regenerate key: %v", err), http.StatusInternalServerError)
 		return
@@ -144,6 +146,7 @@ const dashboardHTML = `<!DOCTYPE html>
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             padding: 40px;
+            padding-top: 10px;
             max-width: 600px;
             width: 100%;
         }
@@ -220,6 +223,15 @@ const dashboardHTML = `<!DOCTYPE html>
         .btn-danger:hover {
             background: #c0392b;
         }
+        .btn-logout {
+            background: #f0f0f0;
+            color: #333;
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+        .btn-logout:hover {
+            background: #e0e0e0;
+        }
         .info-box {
             background: #e8f4fd;
             border-left: 4px solid {{.AccentColorStart}};
@@ -289,12 +301,50 @@ const dashboardHTML = `<!DOCTYPE html>
             font-size: 13px;
             margin-bottom: 20px;
         }
+        .user-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .user-bar-text {
+            color: #333;
+            font-size: 14px;
+            margin-right: 12px;
+        }
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header-title {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 24px;
+            text-align: center;
+        }
+        .header-subtitle {
+            color: #666;
+            font-size: 13px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>LanguageTool Proxy</h1>
-        <p class="subtitle">Your personal API endpoint</p>
+        <div class="user-bar">
+            <span class="user-bar-text">Logged in as {{.Username}}</span>
+            <form method="POST" action="/logout">
+                <button type="submit" class="btn-logout">Logout</button>
+            </form>
+        </div>
+        <div class="header">
+            <div>
+                <h1 class="header-title">LanguageTool Proxy</h1>
+                <p class="header-subtitle">Your personal API endpoint</p>
+            </div>
+        </div>
 
         <div class="info-box">
             <p>Your API endpoint:<br>
@@ -312,9 +362,6 @@ const dashboardHTML = `<!DOCTYPE html>
 
         <div class="button-group">
             <button class="btn-primary" onclick="showRegenerateModal()">Regenerate API Key</button>
-            <form method="POST" action="/logout" style="display: inline;">
-                <button type="submit" class="btn-secondary">Logout</button>
-            </form>
         </div>
     </div>
 

@@ -222,7 +222,7 @@ const dashboardHTML = `<!DOCTYPE html>
             background: #e8f4fd;
             border-left: 4px solid {{.AccentColorStart}};
             padding: 15px;
-            margin-bottom: 20px;
+            margin: 20px;
             border-radius: 4px;
             color: {{.AccentColorStart}};
             font-size: 14px;
@@ -270,6 +270,41 @@ const dashboardHTML = `<!DOCTYPE html>
             font-size: 24px;
             text-align: center;
         }
+        .instructions-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 14px;
+            color: #555;
+        }
+        .instructions-section h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .instructions-section ol, .instructions-section ul, .instruction-section p {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        .instructions-section li {
+            line-height: 1.7;
+        }
+        .instructions-section a {
+            color: {{.AccentColorStart}};
+            text-decoration: none;
+        }
+        .instructions-section a:hover {
+            text-decoration: underline;
+        }
+        .instructions-section > code {
+        	display: block;
+            background: #e8f4fd;
+            padding: 5px 10px;
+            margin: 20px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            border-left: 2px solid gray;
+        }
     </style>
 </head>
 <body>
@@ -299,6 +334,11 @@ const dashboardHTML = `<!DOCTYPE html>
             <button class="btn-primary" id="regenerateBtn" onclick="handleRegenerate()">Generate new API key</button>
         </div>
 
+        <p>
+        LanguageTool will need an API endpoint to use this private server.
+        For this, every user gets a personal API endpoint.
+        </p>
+
         <div class="info-box">
             Your personal API endpoint:
             {{if .HasAPIKey}}
@@ -306,6 +346,30 @@ const dashboardHTML = `<!DOCTYPE html>
             {{else}}
                 <code id="endpointDisplay">No API key generated yet</code>
             {{end}}
+        </div>
+
+        <div class="instructions-section">
+            <h2>Setting up LanguageTool in your browser</h2>
+            <ol>
+                <li>Install the LanguageTool Addon for <a href="https://addons.mozilla.org/en-US/firefox/addon/languagetool/" target="_blank">Firefox</a> or <a href="https://chromewebstore.google.com/detail/ai-grammar-checker-paraph/oldceeleldhonbafppcapldpdifcinji" target="_blank">Chrome</a>.</li>
+                <li>Open LanguageTool Addon Settings</li>
+                <li>Scroll down to "Advanced settings (only for professional users)"</li>
+                <li>In "LanguageTool server"
+                    <ul>
+                        <li>Select "Other server"</li>
+                        <li>Paste in your personal API endpoint</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h2>Disable LanguageTool (optional)</h2>
+            <p>
+                To prevent accidentally sending data to the public servers,
+                you can disable all access from your local machine to that server.
+                For that, under Linux or macOS, edit <code>/etc/hosts</code>
+                and configure:
+            </p>
+            <code>127.0.0.2   languagetool.org</code>
         </div>
     </div>
 

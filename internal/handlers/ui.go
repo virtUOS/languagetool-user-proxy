@@ -334,10 +334,13 @@ const dashboardHTML = `<!DOCTYPE html>
             <button class="btn-primary" id="regenerateBtn" onclick="handleRegenerate()">Generate new API key</button>
         </div>
 
-        <p>
-        LanguageTool will need an API endpoint to use this private server.
-        For this, every user gets a personal API endpoint.
-        </p>
+        <div class="instructions-section">
+            <h2>Personal API endpoint</h2>
+            <p>
+            LanguageTool will need an API endpoint to use this private server.
+            For this, every user gets a personal API endpoint.
+            </p>
+        </div>
 
         <div class="info-box">
             Your personal API endpoint:

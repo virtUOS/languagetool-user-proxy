@@ -211,12 +211,13 @@ const dashboardHTML = `<!DOCTYPE html>
             display: flex;
             justify-content: flex-end;
             align-items: center;
+            gap: 12px;
+            margin-right: -25px;
             margin-bottom: 30px;
         }
         .user-bar-text {
             color: #333;
             font-size: 14px;
-            margin-right: 12px;
         }
         .info-box {
             background: #e8f4fd;

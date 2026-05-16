@@ -1,0 +1,20 @@
+[Unit]
+Description=LanguageTool User Proxy - OIDC-authenticated proxy with per-user API keys
+Documentation=https://github.com/virtuos/languagetool-user-proxy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=languagetool-proxy
+Group=languagetool-proxy
+
+# Binary and environment file locations (as specified)
+ExecStart=/usr/bin/languagetool-user-proxy
+EnvironmentFile=/etc/default/languagetool-user-proxy
+
+# Restart policy for production resilience
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

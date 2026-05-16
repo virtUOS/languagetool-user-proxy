@@ -1,0 +1,24 @@
+name: sqlc code generation
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download sqlc
+        working-directory: /usr/bin
+        run: >
+          curl -L https://github.com/sqlc-dev/sqlc/releases/download/v1.31.1/sqlc_1.31.1_linux_amd64.tar.gz
+          | sudo tar xzvf -
+
+      - name: Build code from SQL files
+        working-directory: internal/database/queries
+        run: sqlc generate
+
+      - name: Make sure code doesn't change
+        run: git diff --quiet

@@ -1,0 +1,63 @@
+name: Create new release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build arm64
+        env:
+          CONTAINER: 1.26.3-arm
+          ARCH: arm64
+        run: >
+          docker run
+          -v .:/go/src/github.com/virtuos/languagetool-user-proxy
+          -w /go/src/github.com/virtuos/languagetool-user-proxy
+          -e CGO_ENABLED=0
+          docker.elastic.co/beats-dev/golang-crossbuild:${CONTAINER}
+          --build-cmd "go build -o languagetool-user-proxy.linux-${ARCH}"
+          -p linux/${ARCH}
+
+      - name: Build armv7
+        env:
+          CONTAINER: 1.26.3-armhf
+          ARCH: armv7
+        run: >
+          docker run
+          -v .:/go/src/github.com/virtuos/languagetool-user-proxy
+          -w /go/src/github.com/virtuos/languagetool-user-proxy
+          -e CGO_ENABLED=0
+          docker.elastic.co/beats-dev/golang-crossbuild:${CONTAINER}
+          --build-cmd "go build -o languagetool-user-proxy.linux-${ARCH}"
+          -p linux/${ARCH}
+
+      - name: Build amd64
+        env:
+          CONTAINER: 1.26.3-main
+          ARCH: amd64
+        run: >
+          docker run
+          -v .:/go/src/github.com/virtuos/languagetool-user-proxy
+          -w /go/src/github.com/virtuos/languagetool-user-proxy
+          -e CGO_ENABLED=0
+          docker.elastic.co/beats-dev/golang-crossbuild:${CONTAINER}
+          --build-cmd "go build -o languagetool-user-proxy.linux-${ARCH}"
+          -p linux/${ARCH}
+
+      - run: ls -lh languagetool-user-proxy*
+
+      - run: file languagetool-user-proxy*
+
+      - name: create new release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: languagetool-user-proxy*
+          fail_on_unmatched_files: true
+          generate_release_notes: true

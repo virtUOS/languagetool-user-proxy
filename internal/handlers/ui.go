@@ -247,17 +247,6 @@ const dashboardHTML = `<!DOCTYPE html>
             color: #c0392b;
             font-size: 14px;
         }
-        .user-bar {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        .user-bar-text {
-            color: #333;
-            font-size: 14px;
-            margin-right: 12px;
-        }
         .header {
             display: flex;
             justify-content: center;

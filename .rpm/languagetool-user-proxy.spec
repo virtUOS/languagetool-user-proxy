@@ -1,0 +1,86 @@
+%define debug_package %{nil}
+
+%define  uid   languagetool-proxy
+%define  gid   languagetool-proxy
+
+Name:          languagetool-user-proxy
+Summary:       Lightweight HTTP proxy for LanguageTool
+Version:       %{appversion}
+Release:       1%{?dist}
+License:       MIT
+
+Source0:       %{name}
+Source1:       %{name}.service
+Source2:       .env.example
+URL:           https://github.com/virtUOS/%{name}
+BuildRoot:     %{_tmppath}/%{name}-root
+
+BuildRequires:     systemd
+Requires(post):    systemd
+Requires(preun):   systemd
+Requires(postun):  systemd
+
+
+%description
+A fast and lightweight HTTP proxy for LanguageTool with OIDC authentication and per-user API keys.
+
+
+%prep
+
+%build
+
+%install
+rm -rf %{buildroot}
+
+# install binary
+install -p -D -m 0755 %{SOURCE0} %{buildroot}%{_bindir}/%{name}
+
+# Install configuration
+install -p -D -m 0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/default/%{name}
+
+# install unit file
+install -p -D -m 0644 \
+   %{SOURCE1} \
+   %{buildroot}%{_unitdir}/%{name}.service
+
+# install systemd environment file
+install -p -D -m 0644 \
+   %{SOURCE2} \
+   %{buildroot}%{_sysconfdir}/default/%{name}
+
+%clean
+rm -rf %{buildroot}
+
+
+%pre
+# Create user and group if nonexistent
+if [ ! $(getent passwd %{uid}) ]; then
+   useradd -M -r -g %{gid} %{uid} > /dev/null 2>&1 || :
+fi
+
+
+%post
+%systemd_post %{name}.service
+
+
+%preun
+%systemd_preun %{name}.service
+
+
+%postun
+%systemd_postun_with_restart %{name}.service
+
+
+%files
+%defattr(-,root,root,-)
+%{_bindir}/%{name}
+%config(noreplace) %{_sysconfdir}/default/%{name}
+%{_unitdir}/%{name}.service
+%license LICENSE
+%doc README.md
+
+
+%changelog
+* Sat May 16 2026 Lars Kiesow <lkiesow@uos.de> - 3.11.3-4
+- Initial build
+

@@ -152,7 +152,11 @@ func (p *Provider) GetOrCreateUser(ctx context.Context, userInfo *UserInfo) (*qu
 		name = sql.NullString{String: userInfo.Email, Valid: true}
 	}
 
-	user, err = p.Queries.CreateUser(ctx, userInfo.Subject, userInfo.Email, name)
+	user, err = p.Queries.CreateUser(ctx, queries.CreateUserParams{
+		OidcSub: userInfo.Subject,
+		Email:   userInfo.Email,
+		Name:    name,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}

@@ -1,56 +1,56 @@
 -- name: CreateUser :one
 INSERT INTO users (oidc_sub, email, name)
-VALUES ($1, $2, $3)
+VALUES (?, ?, ?)
 RETURNING *;
 
 -- name: GetUserByOIDCSub :one
 SELECT * FROM users
-WHERE oidc_sub = $1
+WHERE oidc_sub = ?
 LIMIT 1;
 
 -- name: GetUserByID :one
 SELECT * FROM users
-WHERE id = $1
+WHERE id = ?
 LIMIT 1;
 
 -- name: UpdateUser :exec
 UPDATE users
-SET email = $2, name = $3, updated_at = CURRENT_TIMESTAMP
-WHERE id = $1;
+SET email = ?, name = ?, updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;
 
 -- name: CreateAPIKey :one
 INSERT INTO api_keys (user_id, key_hash, key_prefix)
-VALUES ($1, $2, $3)
+VALUES (?, ?, ?)
 RETURNING *;
 
 -- name: GetAPIKeyByHash :one
 SELECT * FROM api_keys
-WHERE key_hash = $1
+WHERE key_hash = ?
 LIMIT 1;
 
 -- name: GetAPIKeyByUserID :one
 SELECT * FROM api_keys
-WHERE user_id = $1
+WHERE user_id = ?
 ORDER BY created_at DESC
 LIMIT 1;
 
 -- name: DeleteAPIKey :exec
 DELETE FROM api_keys
-WHERE id = $1;
+WHERE id = ?;
 
 -- name: CreateSession :one
 INSERT INTO sessions (user_id, token, expires_at)
-VALUES ($1, $2, $3)
+VALUES (?, ?, ?)
 RETURNING *;
 
 -- name: GetSessionByToken :one
 SELECT * FROM sessions
-WHERE token = $1
+WHERE token = ?
 LIMIT 1;
 
 -- name: DeleteSession :exec
 DELETE FROM sessions
-WHERE id = $1;
+WHERE id = ?;
 
 -- name: DeleteExpiredSessions :exec
 DELETE FROM sessions
@@ -58,5 +58,5 @@ WHERE expires_at < CURRENT_TIMESTAMP;
 
 -- name: ListSessionsByUserID :many
 SELECT * FROM sessions
-WHERE user_id = $1
+WHERE user_id = ?
 AND expires_at > CURRENT_TIMESTAMP;

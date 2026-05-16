@@ -72,7 +72,11 @@ func (m *Manager) RegenerateAPIKey(ctx context.Context, userID int64) (string, e
 	hash := HashKey(key)
 	prefix := GetKeyPrefix(key)
 
-	_, err = m.Queries.CreateAPIKey(ctx, userID, hash, prefix)
+	_, err = m.Queries.CreateAPIKey(ctx, queries.CreateAPIKeyParams{
+		UserID:    userID,
+		KeyHash:   hash,
+		KeyPrefix: prefix,
+	})
 	if err != nil {
 		return "", fmt.Errorf("failed to store API key: %w", err)
 	}

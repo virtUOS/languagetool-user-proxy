@@ -49,7 +49,11 @@ func (m *Manager) CreateSession(ctx context.Context, userID int64) (string, erro
 
 	expiresAt := time.Now().Add(m.SessionDuration)
 
-	_, err = m.Queries.CreateSession(ctx, userID, token, expiresAt)
+	_, err = m.Queries.CreateSession(ctx, queries.CreateSessionParams{
+		UserID:    userID,
+		Token:     token,
+		ExpiresAt: expiresAt,
+	})
 	if err != nil {
 		return "", fmt.Errorf("failed to create session: %w", err)
 	}

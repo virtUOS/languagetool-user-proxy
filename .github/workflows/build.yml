@@ -21,3 +21,6 @@ jobs:
 
       - name: Build project
         run: go build -o languagetool-user-proxy cmd/server/main.go
+
+      - name: Run binary
+        run: ./languagetool-user-proxy --help

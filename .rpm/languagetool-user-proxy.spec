@@ -32,17 +32,25 @@ A fast and lightweight HTTP proxy for LanguageTool with OIDC authentication and 
 rm -rf %{buildroot}
 
 # install binary
-install -p -D -m 0755 %{SOURCE0} %{buildroot}%{_bindir}/%{name}
+install -p -D -m 0755 \
+   %{SOURCE0} \
+   %{buildroot}%{_bindir}/%{name}
 
 # install configuration
 install -p -D -m 0644 \
    %{SOURCE2} \
+   %{buildroot}%{_sysconfdir}/%{name}.conf
+sed -i 's#^DATABASE_PATH=./data#DATABASE_PATH=%{_sharedstatedir}/%{name}#' \
    %{buildroot}%{_sysconfdir}/%{name}.conf
 
 # install unit file
 install -p -D -m 0644 \
    %{SOURCE1} \
    %{buildroot}%{_unitdir}/%{name}.service
+
+# create database directory
+install -p -d -m 0755 \
+   %{buildroot}%{_sharedstatedir}/%{name}
 
 %clean
 rm -rf %{buildroot}
@@ -72,6 +80,7 @@ fi
 %{_bindir}/%{name}
 %config(noreplace) %{_sysconfdir}/%{name}.conf
 %{_unitdir}/%{name}.service
+%attr(755,%{uid},%{uid}) %dir %{_sharedstatedir}/%{name}
 %license LICENSE
 %doc README.md
 

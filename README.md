@@ -109,7 +109,7 @@ CMD ["./server"]
 ### Static Binary
 
 ```bash
-CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server ./cmd/server
+go build -o languagetool-user-proxy cmd/server/main.go
 ```
 
 ## License

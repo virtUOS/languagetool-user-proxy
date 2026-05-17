@@ -1,7 +1,6 @@
 %define debug_package %{nil}
 
 %define  uid   languagetool-proxy
-%define  gid   languagetool-proxy
 
 Name:          languagetool-user-proxy
 Summary:       Lightweight HTTP proxy for LanguageTool
@@ -53,9 +52,9 @@ rm -rf %{buildroot}
 
 
 %pre
-# Create user and group if nonexistent
+# Create user and group if they don't exist
 if [ ! $(getent passwd %{uid}) ]; then
-   useradd -M -r -g %{gid} %{uid} > /dev/null 2>&1 || :
+   useradd --system --user-group %{uid} > /dev/null 2>&1 || :
 fi
 
 

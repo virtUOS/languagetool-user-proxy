@@ -17,10 +17,24 @@ jobs:
         with:
           go-version: 1.26.x
 
-      - name: Build project
+      - name: Build project (amd64)
+        env:
+          CGO_ENABLED: 0
+          GOOS: linux
+          GOARCH: amd64
         run: >
           go build
           -o "languagetool-user-proxy-${{ github.ref_name }}.linux-x86_64"
+          cmd/server/main.go
+
+      - name: Build project (arm64)
+        env:
+          CGO_ENABLED: 0
+          GOOS: linux
+          GOARCH: arm64
+        run: >
+          go build
+          -o "languagetool-user-proxy-${{ github.ref_name }}.linux-aarch64"
           cmd/server/main.go
 
       - name: Build x86_64 (amd64) RPM
@@ -36,7 +50,18 @@ jobs:
           "${{ github.ref_name }}"
           "${ARCH}"
 
-      - run: ls -lh languagetool-user-proxy*
+      - name: Build aarch64 (arm64) RPM
+        env:
+          BINARY: "languagetool-user-proxy-${{ github.ref_name }}.linux-aarch64"
+          ARCH: aarch64
+        run: >
+          docker run
+          -v .:/rpmbuild
+          quay.io/centos/centos:stream10
+          /rpmbuild/.rpm/build-rpm.sh
+          "${BINARY}"
+          "${{ github.ref_name }}"
+          "${ARCH}"
 
       - run: file languagetool-user-proxy*
 

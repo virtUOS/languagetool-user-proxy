@@ -5,7 +5,7 @@
 Name:          languagetool-user-proxy
 Summary:       Lightweight HTTP proxy for LanguageTool
 Version:       %{appversion}
-Release:       1%{?dist}
+Release:       1
 License:       MIT
 
 Source0:       %{name}

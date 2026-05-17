@@ -20,17 +20,10 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Build project
-        env:
-          CGO_ENABLED: 0
-          GOOS: linux
-          GOARCH: amd64
         run: >
           go build
           -o languagetool-user-proxy
           cmd/server/main.go
-
-      - name: Check for static binary
-        run: ldd languagetool-user-proxy 2>&1 | grep 'not a dynamic executable'
 
       - name: Run binary
         run: ./languagetool-user-proxy --help

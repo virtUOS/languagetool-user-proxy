@@ -48,14 +48,8 @@ func main() {
 	}
 	defer db.Close()
 
-	// Read schema
-	schemaSQL, err := os.ReadFile("internal/database/queries/schema.sql")
-	if err != nil {
-		log.Fatalf("Failed to read schema: %v", err)
-	}
-
-	// Run migrations
-	if err := db.Migrate(string(schemaSQL)); err != nil {
+	// Run migrations (schema is embedded in the binary)
+	if err := db.Migrate(queries.SchemaSQL); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 

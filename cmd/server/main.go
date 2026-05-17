@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -23,9 +24,13 @@ import (
 )
 
 func main() {
-	// Load .env file (optional - won't error if not found)
-	if err := godotenv.Load(); err != nil {
-		log.Println("Info: No .env file found, using environment variables")
+	// Define --env-path flag
+	envPath := flag.String("env-path", ".env", "Path to the environment file")
+	flag.Parse()
+
+	// Load environment file from specified path (optional - won't error if not found)
+	if err := godotenv.Load(*envPath); err != nil {
+		log.Printf("Info: No environment file found at %s, using environment variables", *envPath)
 	}
 
 	// Load configuration

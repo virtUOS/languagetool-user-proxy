@@ -9,9 +9,8 @@ Type=simple
 User=languagetool-proxy
 Group=languagetool-proxy
 
-# Binary and environment file locations (as specified)
-ExecStart=/usr/bin/languagetool-user-proxy
-EnvironmentFile=/etc/languagetool-user-proxy.conf
+# Binary and environment file locations
+ExecStart=/usr/bin/languagetool-user-proxy --env-path /etc/languagetool-user-proxy.conf
 
 # Restart policy for production resilience
 Restart=on-failure

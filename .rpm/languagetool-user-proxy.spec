@@ -34,18 +34,15 @@ rm -rf %{buildroot}
 # install binary
 install -p -D -m 0755 %{SOURCE0} %{buildroot}%{_bindir}/%{name}
 
-# Install configuration
-install -p -D -m 0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/default/%{name}
+# install configuration
+install -p -D -m 0644 \
+   %{SOURCE2} \
+   %{buildroot}%{_sysconfdir}/%{name}.conf
 
 # install unit file
 install -p -D -m 0644 \
    %{SOURCE1} \
    %{buildroot}%{_unitdir}/%{name}.service
-
-# install systemd environment file
-install -p -D -m 0644 \
-   %{SOURCE2} \
-   %{buildroot}%{_sysconfdir}/default/%{name}
 
 %clean
 rm -rf %{buildroot}
@@ -73,7 +70,7 @@ fi
 %files
 %defattr(-,root,root,-)
 %{_bindir}/%{name}
-%config(noreplace) %{_sysconfdir}/default/%{name}
+%config(noreplace) %{_sysconfdir}/%{name}.conf
 %{_unitdir}/%{name}.service
 %license LICENSE
 %doc README.md

@@ -116,7 +116,33 @@ func (h *UIHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.SessionManager.ClearSessionCookie(w)
+	ctx := r.Context()
+	sessionToken := h.SessionManager.GetTokenFromRequest(r)
+
+	if sessionToken != "" {
+		// Get the session to retrieve the ID token
+		sess, err := h.SessionManager.GetSessionByToken(ctx, sessionToken)
+		if err == nil {
+			// Delete the session
+			h.SessionManager.DeleteSession(ctx, sess.Session.ID)
+
+			// Clear the session cookie
+			h.SessionManager.ClearSessionCookie(w)
+
+			// Get the logout URL from the OIDC provider
+			logoutURL := h.OIDCProvider.GetLogoutURL(sess.Session.IDToken)
+			if logoutURL != "" {
+				// Redirect to the OIDC provider's logout endpoint if configured
+				http.Redirect(w, r, logoutURL, http.StatusFound)
+				return
+			}
+		}
+
+		// Clear the session cookie even if we couldn't get the session
+		h.SessionManager.ClearSessionCookie(w)
+	}
+
+	// Fallback: just redirect to home if no session
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 

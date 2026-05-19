@@ -38,24 +38,31 @@ func (q *Queries) CreateAPIKey(ctx context.Context, arg CreateAPIKeyParams) (Api
 }
 
 const createSession = `-- name: CreateSession :one
-INSERT INTO sessions (user_id, token, expires_at)
-VALUES (?, ?, ?)
-RETURNING id, user_id, token, created_at, expires_at
+INSERT INTO sessions (user_id, token, id_token, expires_at)
+VALUES (?, ?, ?, ?)
+RETURNING id, user_id, token, id_token, created_at, expires_at
 `
 
 type CreateSessionParams struct {
 	UserID    int64
 	Token     string
+	IDToken   string
 	ExpiresAt time.Time
 }
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
-	row := q.db.QueryRowContext(ctx, createSession, arg.UserID, arg.Token, arg.ExpiresAt)
+	row := q.db.QueryRowContext(ctx, createSession,
+		arg.UserID,
+		arg.Token,
+		arg.IDToken,
+		arg.ExpiresAt,
+	)
 	var i Session
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
 		&i.Token,
+		&i.IDToken,
 		&i.CreatedAt,
 		&i.ExpiresAt,
 	)
@@ -160,7 +167,7 @@ func (q *Queries) GetAPIKeyByUserID(ctx context.Context, userID int64) (ApiKey, 
 }
 
 const getSessionByToken = `-- name: GetSessionByToken :one
-SELECT id, user_id, token, created_at, expires_at FROM sessions
+SELECT id, user_id, token, id_token, created_at, expires_at FROM sessions
 WHERE token = ?
 LIMIT 1
 `
@@ -172,6 +179,7 @@ func (q *Queries) GetSessionByToken(ctx context.Context, token string) (Session,
 		&i.ID,
 		&i.UserID,
 		&i.Token,
+		&i.IDToken,
 		&i.CreatedAt,
 		&i.ExpiresAt,
 	)
@@ -219,7 +227,7 @@ func (q *Queries) GetUserByOIDCSub(ctx context.Context, oidcSub string) (User, e
 }
 
 const listSessionsByUserID = `-- name: ListSessionsByUserID :many
-SELECT id, user_id, token, created_at, expires_at FROM sessions
+SELECT id, user_id, token, id_token, created_at, expires_at FROM sessions
 WHERE user_id = ?
 AND expires_at > CURRENT_TIMESTAMP
 `
@@ -237,6 +245,7 @@ func (q *Queries) ListSessionsByUserID(ctx context.Context, userID int64) ([]Ses
 			&i.ID,
 			&i.UserID,
 			&i.Token,
+			&i.IDToken,
 			&i.CreatedAt,
 			&i.ExpiresAt,
 		); err != nil {

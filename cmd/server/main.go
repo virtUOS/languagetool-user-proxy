@@ -111,7 +111,7 @@ func main() {
 		}
 
 		// Create session
-		token, err := sessionManager.CreateSession(ctx, user.ID)
+		token, err := sessionManager.CreateSession(ctx, user.ID, result.IDToken)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

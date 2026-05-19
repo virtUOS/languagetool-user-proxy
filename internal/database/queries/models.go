@@ -22,6 +22,7 @@ type Session struct {
 	ID        int64
 	UserID    int64
 	Token     string
+	IDToken   string
 	CreatedAt sql.NullTime
 	ExpiresAt time.Time
 }

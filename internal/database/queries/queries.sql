@@ -39,8 +39,8 @@ DELETE FROM api_keys
 WHERE id = ?;
 
 -- name: CreateSession :one
-INSERT INTO sessions (user_id, token, expires_at)
-VALUES (?, ?, ?)
+INSERT INTO sessions (user_id, token, id_token, expires_at)
+VALUES (?, ?, ?, ?)
 RETURNING *;
 
 -- name: GetSessionByToken :one

@@ -41,7 +41,7 @@ func generateToken() (string, error) {
 	return hex.EncodeToString(b), nil
 }
 
-func (m *Manager) CreateSession(ctx context.Context, userID int64) (string, error) {
+func (m *Manager) CreateSession(ctx context.Context, userID int64, idToken string) (string, error) {
 	token, err := generateToken()
 	if err != nil {
 		return "", err
@@ -52,6 +52,7 @@ func (m *Manager) CreateSession(ctx context.Context, userID int64) (string, erro
 	_, err = m.Queries.CreateSession(ctx, queries.CreateSessionParams{
 		UserID:    userID,
 		Token:     token,
+		IDToken:   idToken,
 		ExpiresAt: expiresAt,
 	})
 	if err != nil {

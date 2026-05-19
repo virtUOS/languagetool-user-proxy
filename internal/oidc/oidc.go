@@ -5,8 +5,11 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/virtuos/languagetool-user-proxy/internal/config"
@@ -19,11 +22,12 @@ func init() {
 }
 
 type Provider struct {
-	Provider   *oidc.Provider
-	OIDCConfig *oauth2.Config
-	Config     *config.Config
-	Queries    *queries.Queries
-	Verifier   *oidc.IDTokenVerifier
+	Provider           *oidc.Provider
+	OIDCConfig         *oauth2.Config
+	Config             *config.Config
+	Queries            *queries.Queries
+	Verifier           *oidc.IDTokenVerifier
+	EndSessionEndpoint string
 }
 
 type UserInfo struct {
@@ -52,12 +56,36 @@ func NewProvider(cfg *config.Config, db *queries.Queries) (*Provider, error) {
 		ClientID: cfg.OIDCClientID,
 	})
 
+	// Discover end_session_endpoint from OIDC provider metadata
+	// The go-oidc library loads the discovery document when creating the provider
+	// We'll fetch the discovery document to get the actual end_session_endpoint
+	endSessionEndpoint := ""
+
+	// Fetch the discovery document to get the end_session_endpoint
+	discoveryURL, err := url.JoinPath(cfg.OIDCIssuerURL, ".well-known/openid-configuration")
+	if err == nil {
+		resp, err := http.Get(discoveryURL)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			body, err := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if err == nil {
+				var discovery struct {
+					EndSessionEndpoint string `json:"end_session_endpoint"`
+				}
+				if err := json.Unmarshal(body, &discovery); err == nil && discovery.EndSessionEndpoint != "" {
+					endSessionEndpoint = discovery.EndSessionEndpoint
+				}
+			}
+		}
+	}
+
 	return &Provider{
-		Provider:   provider,
-		OIDCConfig: oidcConfig,
-		Config:     cfg,
-		Queries:    db,
-		Verifier:   verifier,
+		Provider:           provider,
+		OIDCConfig:         oidcConfig,
+		Config:             cfg,
+		Queries:            db,
+		Verifier:           verifier,
+		EndSessionEndpoint: endSessionEndpoint,
 	}, nil
 }
 
@@ -80,6 +108,7 @@ func (p *Provider) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 type CallbackResult struct {
 	UserInfo *UserInfo
+	IDToken  string
 	Error    error
 }
 
@@ -136,6 +165,7 @@ func (p *Provider) CallbackHandler(w http.ResponseWriter, r *http.Request) *Call
 			Email:   claims.Email,
 			Name:    claims.PreferredUsername,
 		},
+		IDToken: rawIDToken,
 	}
 }
 
@@ -168,4 +198,27 @@ func generateState() string {
 	b := make([]byte, 16)
 	rand.Read(b)
 	return hex.EncodeToString(b)
+}
+
+// GetLogoutURL generates the URL to redirect to for OIDC logout
+// It includes the id_token_hint and post_logout_redirect_uri
+// Returns empty string if end_session_endpoint is not configured
+func (p *Provider) GetLogoutURL(idToken string) string {
+	if p.EndSessionEndpoint == "" {
+		return ""
+	}
+
+	// Parse the end session endpoint URL
+	u, err := url.Parse(p.EndSessionEndpoint)
+	if err != nil {
+		return ""
+	}
+
+	// Get existing query parameters and add our logout parameters
+	q := u.Query()
+	q.Set("id_token_hint", idToken)
+	q.Set("post_logout_redirect_uri", p.Config.FrontendURL)
+	u.RawQuery = q.Encode()
+
+	return u.String()
 }

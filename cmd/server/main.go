@@ -65,6 +65,14 @@ func main() {
 	// Initialize session manager
 	sessionManager := session.NewManager(queries, cfg.SessionDuration, cfg.CookieSecret)
 
+	// Clean up expired sessions
+	ctx := context.Background()
+	if deleted, err := sessionManager.CleanupExpiredSessions(ctx); err != nil {
+		log.Printf("Warning: Failed to clean up expired sessions: %v", err)
+	} else if deleted > 0 {
+		log.Printf("Cleaned up %d expired sessions", deleted)
+	}
+
 	// Initialize API key manager
 	apiKeyManager := apikey.NewManager(queries)
 

@@ -52,7 +52,7 @@ LIMIT 1;
 DELETE FROM sessions
 WHERE id = ?;
 
--- name: DeleteExpiredSessions :exec
+-- name: DeleteExpiredSessions :execrows
 DELETE FROM sessions
 WHERE expires_at < CURRENT_TIMESTAMP;
 

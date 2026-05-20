@@ -29,9 +29,15 @@ func NewProxyHandler(backendURL string, apiKeyManager *apikey.Manager) (*ProxyHa
 
 func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Extract API key from path
-	key := apikey.ExtractKeyFromPath(r.URL.Path)
-	if key == "" {
-		http.Error(w, "Missing API key", http.StatusUnauthorized)
+	key, proxypath, err := apikey.ExtractKeyFromPath(r.URL.Path)
+	if err != nil {
+		http.Error(w, "Invalid path or API key", http.StatusUnauthorized)
+		return
+	}
+
+	// Only allow /v2/ paths to be proxied
+	if !strings.HasPrefix(proxypath, "/v2/") {
+		http.NotFound(w, r)
 		return
 	}
 
@@ -43,23 +49,15 @@ func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Proxy request from user %d: %s %s", userID, r.Method, r.URL.Path)
+	keyPrefix := apikey.GetKeyPrefix(key)
+	safePath := "/" + keyPrefix + "..." + proxypath
+	log.Printf("Proxy request from user %d: %s %s", userID, r.Method, safePath)
 
 	// Create reverse proxy
 	proxy := httputil.NewSingleHostReverseProxy(h.BackendURL)
 
 	// Modify the request to remove the API key from the path
-	originalPath := r.URL.Path
-	r.URL.Path = strings.TrimPrefix(originalPath, "/"+key)
-	if !strings.HasPrefix(r.URL.Path, "/") {
-		r.URL.Path = "/" + r.URL.Path
-	}
-
-	// Only allow /v2/ paths to be proxied
-	if !strings.HasPrefix(r.URL.Path, "/v2/") {
-		http.NotFound(w, r)
-		return
-	}
+	r.URL.Path = proxypath
 
 	// Set X-Forwarded headers
 	proxy.ServeHTTP(w, r)

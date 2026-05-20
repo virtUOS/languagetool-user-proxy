@@ -87,6 +87,9 @@ func main() {
 	r := chi.NewRouter()
 
 	// Middleware
+	if cfg.EnableRealIP {
+		r.Use(middleware.RealIP)
+	}
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)

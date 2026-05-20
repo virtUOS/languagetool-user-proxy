@@ -95,13 +95,15 @@ func (m *Manager) ValidateAPIKey(ctx context.Context, key string) (int64, error)
 	return apiKey.UserID, nil
 }
 
-func ExtractKeyFromPath(path string) string {
-	parts := strings.Split(strings.Trim(path, "/"), "/")
-	if len(parts) > 0 {
-		// Check if the first part looks like an API key (64 hex chars)
-		if len(parts[0]) == keyLength {
-			return parts[0]
-		}
+func ExtractKeyFromPath(path string) (string, string, error) {
+	parts := strings.SplitN(path, "/", 3)
+	if len(parts) != 3 {
+		return "", "", fmt.Errorf("Proxy path does not contain API key")
 	}
-	return ""
+	apikey := parts[1]
+	proxypath := "/" + parts[2]
+	if len(apikey) != keyLength {
+		return "", "", fmt.Errorf("Invalid API key")
+	}
+	return apikey, proxypath, nil
 }

@@ -50,6 +50,9 @@ type Config struct {
 	// UI Accent Colors
 	UIAccentColorStart string
 	UIAccentColorEnd   string
+
+	// RealIP
+	EnableRealIP bool
 }
 
 // Load reads configuration from environment variables
@@ -69,6 +72,7 @@ func Load() *Config {
 		CookieSecret:       getEnv("COOKIE_SECRET", generateRandomSecret()),
 		UIAccentColorStart: getEnv("UI_ACCENT_COLOR_START", "#667eea"),
 		UIAccentColorEnd:   getEnv("UI_ACCENT_COLOR_END", "#764ba2"),
+		EnableRealIP:       getEnv("ENABLE_REAL_IP", "false") == "true",
 	}
 }
 

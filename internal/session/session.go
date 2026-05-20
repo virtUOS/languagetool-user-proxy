@@ -89,6 +89,14 @@ func (m *Manager) DeleteSession(ctx context.Context, sessionID int64) error {
 	return m.Queries.DeleteSession(ctx, sessionID)
 }
 
+func (m *Manager) CleanupExpiredSessions(ctx context.Context) (int64, error) {
+	result, err := m.Queries.DeleteExpiredSessions(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete expired sessions: %w", err)
+	}
+	return result, nil
+}
+
 func (m *Manager) SetSessionCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     sessionCookieName,

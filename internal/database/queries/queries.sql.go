@@ -105,14 +105,17 @@ func (q *Queries) DeleteAPIKey(ctx context.Context, id int64) error {
 	return err
 }
 
-const deleteExpiredSessions = `-- name: DeleteExpiredSessions :exec
+const deleteExpiredSessions = `-- name: DeleteExpiredSessions :execrows
 DELETE FROM sessions
 WHERE expires_at < CURRENT_TIMESTAMP
 `
 
-func (q *Queries) DeleteExpiredSessions(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, deleteExpiredSessions)
-	return err
+func (q *Queries) DeleteExpiredSessions(ctx context.Context) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteExpiredSessions)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const deleteSession = `-- name: DeleteSession :exec

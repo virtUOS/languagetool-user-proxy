@@ -125,8 +125,14 @@ func main() {
 	r.Post("/regenerate-key", uiHandler.RegenerateKey)
 
 	// Metrics endpoint - must be defined before proxy handler
-	metricsHandler := basicAuthMiddleware(cfg.MetricsBasicAuthUser, cfg.MetricsBasicAuthPass)(promhttp.Handler())
-	r.Handle("/metrics", metricsHandler)
+	metricsHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := metrics.UpdateGauges(r.Context()); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		promhttp.Handler().ServeHTTP(w, r)
+	})
+	r.Handle("/metrics", basicAuthMiddleware(cfg.MetricsBasicAuthUser, cfg.MetricsBasicAuthPass)(metricsHandler))
 
 	// OIDC routes
 	r.Get("/login", oidcProvider.LoginHandler)

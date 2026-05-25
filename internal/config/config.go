@@ -53,26 +53,32 @@ type Config struct {
 
 	// RealIP
 	EnableRealIP bool
+
+	// Metrics Basic Auth
+	MetricsBasicAuthUser string
+	MetricsBasicAuthPass string
 }
 
 // Load reads configuration from environment variables
 func Load() *Config {
 	return &Config{
-		ListenAddress:      getEnv("LISTEN_ADDRESS", "127.0.0.1"),
-		ListenPort:         getEnv("LISTEN_PORT", "8080"),
-		DatabasePath:       getEnv("DATABASE_PATH", "./data/languagetool.db"),
-		OIDCIssuerURL:      getEnv("OIDC_ISSUER_URL", ""),
-		OIDCClientID:       getEnv("OIDC_CLIENT_ID", ""),
-		OIDCClientSecret:   getEnv("OIDC_CLIENT_SECRET", ""),
-		OIDCRedirectURI:    getEnv("OIDC_REDIRECT_URI", ""),
-		OIDCScope:          getEnv("OIDC_SCOPE", "openid profile email"),
-		BackendURL:         getEnv("BACKEND_URL", "http://localhost:8080"),
-		FrontendURL:        getEnv("FRONTEND_URL", "https://languagetool.example.com"),
-		SessionDuration:    time.Duration(getEnvDuration("SESSION_DURATION_HOURS", 24)) * time.Hour,
-		CookieSecret:       getEnv("COOKIE_SECRET", generateRandomSecret()),
-		UIAccentColorStart: getEnv("UI_ACCENT_COLOR_START", "#667eea"),
-		UIAccentColorEnd:   getEnv("UI_ACCENT_COLOR_END", "#764ba2"),
-		EnableRealIP:       getEnv("ENABLE_REAL_IP", "false") == "true",
+		ListenAddress:        getEnv("LISTEN_ADDRESS", "127.0.0.1"),
+		ListenPort:           getEnv("LISTEN_PORT", "8080"),
+		DatabasePath:         getEnv("DATABASE_PATH", "./data/languagetool.db"),
+		OIDCIssuerURL:        getEnv("OIDC_ISSUER_URL", ""),
+		OIDCClientID:         getEnv("OIDC_CLIENT_ID", ""),
+		OIDCClientSecret:     getEnv("OIDC_CLIENT_SECRET", ""),
+		OIDCRedirectURI:      getEnv("OIDC_REDIRECT_URI", ""),
+		OIDCScope:            getEnv("OIDC_SCOPE", "openid profile email"),
+		BackendURL:           getEnv("BACKEND_URL", "http://localhost:8080"),
+		FrontendURL:          getEnv("FRONTEND_URL", "https://languagetool.example.com"),
+		SessionDuration:      time.Duration(getEnvDuration("SESSION_DURATION_HOURS", 24)) * time.Hour,
+		CookieSecret:         getEnv("COOKIE_SECRET", generateRandomSecret()),
+		UIAccentColorStart:   getEnv("UI_ACCENT_COLOR_START", "#667eea"),
+		UIAccentColorEnd:     getEnv("UI_ACCENT_COLOR_END", "#764ba2"),
+		EnableRealIP:         getEnv("ENABLE_REAL_IP", "false") == "true",
+		MetricsBasicAuthUser: getEnv("METRICS_BASIC_AUTH_USER", ""),
+		MetricsBasicAuthPass: getEnv("METRICS_BASIC_AUTH_PASS", ""),
 	}
 }
 

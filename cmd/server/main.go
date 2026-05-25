@@ -25,6 +25,26 @@ import (
 	"github.com/virtuos/languagetool-user-proxy/internal/session"
 )
 
+// basicAuthMiddleware returns a middleware that checks for basic auth credentials
+// if both username and password are configured. If not configured, it returns a
+// middleware that allows all requests through.
+func basicAuthMiddleware(username, password string) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		if username == "" || password == "" {
+			return next
+		}
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			user, pass, ok := r.BasicAuth()
+			if !ok || user != username || pass != password {
+				w.Header().Set("WWW-Authenticate", `Basic realm="metrics"`)
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 func main() {
 	// Define --env-path flag
 	envPath := flag.String("env-path", ".env", "Path to the environment file")
@@ -105,7 +125,8 @@ func main() {
 	r.Post("/regenerate-key", uiHandler.RegenerateKey)
 
 	// Metrics endpoint - must be defined before proxy handler
-	r.Handle("/metrics", promhttp.Handler())
+	metricsHandler := basicAuthMiddleware(cfg.MetricsBasicAuthUser, cfg.MetricsBasicAuthPass)(promhttp.Handler())
+	r.Handle("/metrics", metricsHandler)
 
 	// OIDC routes
 	r.Get("/login", oidcProvider.LoginHandler)

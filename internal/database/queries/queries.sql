@@ -60,3 +60,10 @@ WHERE expires_at < CURRENT_TIMESTAMP;
 SELECT * FROM sessions
 WHERE user_id = ?
 AND expires_at > CURRENT_TIMESTAMP;
+
+-- name: CountUsers :one
+SELECT COUNT(*) FROM users;
+
+-- name: CountValidSessions :one
+SELECT COUNT(*) FROM sessions
+WHERE expires_at > CURRENT_TIMESTAMP;

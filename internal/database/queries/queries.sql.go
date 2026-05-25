@@ -11,6 +11,29 @@ import (
 	"time"
 )
 
+const countUsers = `-- name: CountUsers :one
+SELECT COUNT(*) FROM users
+`
+
+func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countUsers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countValidSessions = `-- name: CountValidSessions :one
+SELECT COUNT(*) FROM sessions
+WHERE expires_at > CURRENT_TIMESTAMP
+`
+
+func (q *Queries) CountValidSessions(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countValidSessions)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createAPIKey = `-- name: CreateAPIKey :one
 INSERT INTO api_keys (user_id, key_hash, key_prefix)
 VALUES (?, ?, ?)

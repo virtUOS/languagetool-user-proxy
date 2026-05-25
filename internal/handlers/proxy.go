@@ -8,14 +8,16 @@ import (
 	"strings"
 
 	"github.com/virtuos/languagetool-user-proxy/internal/apikey"
+	"github.com/virtuos/languagetool-user-proxy/internal/metrics"
 )
 
 type ProxyHandler struct {
 	BackendURL    *url.URL
 	APIKeyManager *apikey.Manager
+	Metrics       *metrics.Metrics
 }
 
-func NewProxyHandler(backendURL string, apiKeyManager *apikey.Manager) (*ProxyHandler, error) {
+func NewProxyHandler(backendURL string, apiKeyManager *apikey.Manager, metrics *metrics.Metrics) (*ProxyHandler, error) {
 	backend, err := url.Parse(backendURL)
 	if err != nil {
 		return nil, err
@@ -24,6 +26,7 @@ func NewProxyHandler(backendURL string, apiKeyManager *apikey.Manager) (*ProxyHa
 	return &ProxyHandler{
 		BackendURL:    backend,
 		APIKeyManager: apiKeyManager,
+		Metrics:       metrics,
 	}, nil
 }
 
@@ -59,6 +62,33 @@ func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Modify the request to remove the API key from the path
 	r.URL.Path = proxypath
 
-	// Set X-Forwarded headers
-	proxy.ServeHTTP(w, r)
+	// Wrap the ResponseWriter to capture status code
+	wrapped := &responseWriter{ResponseWriter: w, statusCode: 200}
+
+	proxy.ServeHTTP(wrapped, r)
+
+	// Increment request counter with status code
+	h.Metrics.IncrementRequest(proxypath, wrapped.statusCodeStr())
+}
+
+// responseWriter wraps http.ResponseWriter to capture status code
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
+}
+
+func (rw *responseWriter) statusCodeStr() string {
+	if rw.statusCode >= 200 && rw.statusCode < 300 {
+		return "2xx"
+	} else if rw.statusCode >= 300 && rw.statusCode < 400 {
+		return "3xx"
+	} else if rw.statusCode >= 400 && rw.statusCode < 500 {
+		return "4xx"
+	}
+	return "5xx"
 }

@@ -13,12 +13,14 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/virtuos/languagetool-user-proxy/internal/apikey"
 	"github.com/virtuos/languagetool-user-proxy/internal/config"
 	"github.com/virtuos/languagetool-user-proxy/internal/database"
 	"github.com/virtuos/languagetool-user-proxy/internal/database/queries"
 	"github.com/virtuos/languagetool-user-proxy/internal/handlers"
+	"github.com/virtuos/languagetool-user-proxy/internal/metrics"
 	"github.com/virtuos/languagetool-user-proxy/internal/oidc"
 	"github.com/virtuos/languagetool-user-proxy/internal/session"
 )
@@ -56,6 +58,9 @@ func main() {
 	// Initialize queries
 	queries := queries.New(db.DB)
 
+	// Initialize metrics
+	metrics := metrics.NewMetrics(queries)
+
 	// Initialize OIDC provider
 	oidcProvider, err := oidc.NewProvider(cfg, queries)
 	if err != nil {
@@ -78,7 +83,7 @@ func main() {
 
 	// Initialize handlers
 	uiHandler := handlers.NewUIHandler(oidcProvider, sessionManager, apiKeyManager, cfg)
-	proxyHandler, err := handlers.NewProxyHandler(cfg.BackendURL, apiKeyManager)
+	proxyHandler, err := handlers.NewProxyHandler(cfg.BackendURL, apiKeyManager, metrics)
 	if err != nil {
 		log.Fatalf("Failed to create proxy handler: %v", err)
 	}
@@ -98,6 +103,9 @@ func main() {
 	r.Get("/", uiHandler.Dashboard)
 	r.Post("/logout", uiHandler.Logout)
 	r.Post("/regenerate-key", uiHandler.RegenerateKey)
+
+	// Metrics endpoint - must be defined before proxy handler
+	r.Handle("/metrics", promhttp.Handler())
 
 	// OIDC routes
 	r.Get("/login", oidcProvider.LoginHandler)
@@ -158,6 +166,7 @@ func main() {
 
 	log.Printf("Starting server on http://%s:%s", cfg.ListenAddress, cfg.ListenPort)
 	log.Printf("Backend URL: %s", cfg.BackendURL)
+	log.Printf("Metrics endpoint: http://%s:%s/metrics", cfg.ListenAddress, cfg.ListenPort)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Server error: %v", err)
 	}

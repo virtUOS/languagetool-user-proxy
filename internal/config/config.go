@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -123,6 +124,8 @@ func getEnvDuration(key string, defaultValue int) int {
 
 func generateRandomSecret() string {
 	b := make([]byte, 32)
-	rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		log.Fatalf("Failed to generate random secret: %v", err)
+	}
 	return hex.EncodeToString(b)
 }

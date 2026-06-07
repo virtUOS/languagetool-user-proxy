@@ -1,0 +1,45 @@
+# LanguageTool User Proxy - Environment Configuration
+# Copy this file to .env and fill in your values
+# The .env file is automatically loaded on startup
+
+# Server Configuration
+# Listen address (default: 127.0.0.1)
+LISTEN_ADDRESS=127.0.0.1
+LISTEN_PORT=8080
+DATABASE_PATH=./languagetool.db
+
+# OIDC Configuration (Required)
+# Replace with your OIDC provider settings
+OIDC_ISSUER_URL=http://127.0.0.1:5556/dex
+OIDC_CLIENT_ID=example-app
+OIDC_CLIENT_SECRET=ZXhhbXBsZS1hcHAtc2VjcmV0
+OIDC_REDIRECT_URI=http://127.0.0.1:8080/callback
+
+# Optional: OIDC scopes (default: openid profile email)
+OIDC_SCOPE=openid profile email
+
+# LanguageTool Backend URL (Required)
+BACKEND_URL=http://127.0.0.1:8000
+
+# Session Configuration
+# Session duration in hours (default: 24)
+SESSION_DURATION_HOURS=24
+
+# Cookie Secret (Optional - auto-generated if not set)
+# Generate a random secret: openssl rand -hex 32
+# COOKIE_SECRET=your-random-secret-key-here
+
+# UI Accent Colors (Optional - defaults: #667eea and #764ba2)
+# These colors are used for the gradient background and primary button
+UI_ACCENT_COLOR_START=#ac1035
+#UI_ACCENT_COLOR_END=#764ba2
+
+# Metrics Basic Authentication (Optional)
+# Set METRICS_BASIC_AUTH_USER and METRICS_BASIC_AUTH_PASS to protect the /metrics endpoint
+# If not set, the metrics endpoint will be publicly accessible
+METRICS_BASIC_AUTH_USER=prometheus
+METRICS_BASIC_AUTH_PASS=secret
+
+# Frontend URL (Required)
+# This is the public URL where the proxy is deployed and will be shown to users
+FRONTEND_URL=https://languagetool.uni-osnabrueck.de

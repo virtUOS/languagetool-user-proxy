@@ -17,6 +17,7 @@ type Manager struct {
 	Queries         *queries.Queries
 	SessionDuration time.Duration
 	CookieSecret    string
+	CookieSecure    bool
 }
 
 // SessionWithUser contains session data along with the associated user information
@@ -25,11 +26,12 @@ type SessionWithUser struct {
 	User    queries.User
 }
 
-func NewManager(queries *queries.Queries, duration time.Duration, secret string) *Manager {
+func NewManager(queries *queries.Queries, duration time.Duration, secret string, secure bool) *Manager {
 	return &Manager{
 		Queries:         queries,
 		SessionDuration: duration,
 		CookieSecret:    secret,
+		CookieSecure:    secure,
 	}
 }
 
@@ -104,7 +106,7 @@ func (m *Manager) SetSessionCookie(w http.ResponseWriter, token string) {
 		Path:     "/",
 		MaxAge:   int(m.SessionDuration.Seconds()),
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   m.CookieSecure,
 		SameSite: http.SameSiteLaxMode,
 	})
 }

@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -46,7 +47,8 @@ type Config struct {
 	SessionDuration time.Duration
 
 	// Cookie
-	CookieSecret string
+	CookieSecret  string
+	CookieSecure  bool
 
 	// UI Accent Colors
 	UIAccentColorStart string
@@ -75,6 +77,7 @@ func Load() *Config {
 		FrontendURL:          getEnv("FRONTEND_URL", "https://languagetool.example.com"),
 		SessionDuration:      time.Duration(getEnvDuration("SESSION_DURATION_HOURS", 24)) * time.Hour,
 		CookieSecret:         getEnv("COOKIE_SECRET", generateRandomSecret()),
+		CookieSecure:         strings.HasPrefix(getEnv("FRONTEND_URL", ""), "https://"),
 		UIAccentColorStart:   getEnv("UI_ACCENT_COLOR_START", "#667eea"),
 		UIAccentColorEnd:     getEnv("UI_ACCENT_COLOR_END", "#764ba2"),
 		EnableRealIP:         getEnv("ENABLE_REAL_IP", "false") == "true",

@@ -60,6 +60,10 @@ type Config struct {
 	// Metrics Basic Auth
 	MetricsBasicAuthUser string
 	MetricsBasicAuthPass string
+
+	// Rate Limiting
+	RateLimitRPS   float64
+	RateLimitBurst int
 }
 
 // Load reads configuration from environment variables
@@ -83,6 +87,8 @@ func Load() *Config {
 		EnableRealIP:         getEnv("ENABLE_REAL_IP", "false") == "true",
 		MetricsBasicAuthUser: getEnv("METRICS_BASIC_AUTH_USER", ""),
 		MetricsBasicAuthPass: getEnv("METRICS_BASIC_AUTH_PASS", ""),
+		RateLimitRPS:         getEnvFloat("RATE_LIMIT_RPS", 5.0),
+		RateLimitBurst:       getEnvDuration("RATE_LIMIT_BURST", 10),
 	}
 }
 
@@ -120,6 +126,15 @@ func getEnvDuration(key string, defaultValue int) int {
 	if value := os.Getenv(key); value != "" {
 		if hours, err := strconv.Atoi(value); err == nil {
 			return hours
+		}
+	}
+	return defaultValue
+}
+
+func getEnvFloat(key string, defaultValue float64) float64 {
+	if value := os.Getenv(key); value != "" {
+		if f, err := strconv.ParseFloat(value, 64); err == nil {
+			return f
 		}
 	}
 	return defaultValue

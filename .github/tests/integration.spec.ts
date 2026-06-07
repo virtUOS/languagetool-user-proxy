@@ -69,3 +69,48 @@ test('login, use API key, regenerate, verify', async ({ page, request }) => {
   });
   expect(check3.status()).toBe(401);
 });
+
+test('rate limiting returns 429 after burst is exceeded', async ({ page, request }) => {
+  await page.goto('/');
+  await page.waitForURL(/5556\/dex/);
+
+  await page.fill('input[name="login"]', 'test@example.com');
+  await page.fill('input[name="password"]', 'test');
+  await page.click('button[type="submit"]');
+
+  const grantButton = page.locator('button:has-text("Grant Access")');
+  if (await grantButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await grantButton.click();
+  }
+
+  await page.waitForURL('http://127.0.0.1:8080/');
+
+  // Regenerate to get a fresh key with a full burst bucket
+  const [resp] = await Promise.all([
+    page.waitForResponse(
+      (r) => r.url().includes('/regenerate-key') && r.request().method() === 'POST',
+    ),
+    page.waitForEvent('dialog').then((d) => d.accept()),
+    page.click('#regenerateBtn'),
+  ]);
+  await page.waitForEvent('dialog').then((d) => d.accept());
+  const { key } = await resp.json();
+
+  // Fire 20 concurrent requests — default burst is 10, so at least some must be 429
+  const responses = await Promise.all(
+    Array.from({ length: 20 }, () =>
+      request.post(`http://127.0.0.1:8080/${key}/v2/check`, {
+        form: { text: 'Hello world', language: 'en' },
+      })
+    )
+  );
+
+  const statuses = responses.map((r) => r.status());
+  const tooMany = responses.filter((r) => r.status() === 429);
+
+  expect(statuses.every((s) => s === 200 || s === 429)).toBe(true);
+  expect(tooMany.length).toBeGreaterThan(0);
+  for (const r of tooMany) {
+    expect(r.headers()['retry-after']).toBe('1');
+  }
+});

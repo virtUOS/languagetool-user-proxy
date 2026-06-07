@@ -1,5 +1,17 @@
 import { test, expect } from '@playwright/test';
 
+test('metrics endpoint requires auth and returns prometheus data', async ({ request }) => {
+  const unauthed = await request.get('http://127.0.0.1:8080/metrics');
+  expect(unauthed.status()).toBe(401);
+
+  const authed = await request.get('http://127.0.0.1:8080/metrics', {
+    headers: { Authorization: 'Basic ' + Buffer.from('prometheus:secret').toString('base64') },
+  });
+  expect(authed.status()).toBe(200);
+  expect(authed.headers()['content-type']).toContain('text/plain');
+  expect(await authed.text()).toContain('go_goroutines');
+});
+
 test('login, use API key, regenerate, verify', async ({ page, request }) => {
   await page.goto('/');
   await page.waitForURL(/5556\/dex/);

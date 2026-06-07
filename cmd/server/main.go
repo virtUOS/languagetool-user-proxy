@@ -22,6 +22,7 @@ import (
 	"github.com/virtuos/languagetool-user-proxy/internal/handlers"
 	"github.com/virtuos/languagetool-user-proxy/internal/metrics"
 	"github.com/virtuos/languagetool-user-proxy/internal/oidc"
+	"github.com/virtuos/languagetool-user-proxy/internal/ratelimit"
 	"github.com/virtuos/languagetool-user-proxy/internal/session"
 )
 
@@ -101,9 +102,12 @@ func main() {
 	// Initialize API key manager
 	apiKeyManager := apikey.NewManager(queries)
 
+	// Initialize rate limiter
+	limiter := ratelimit.NewStore(cfg.RateLimitRPS, cfg.RateLimitBurst)
+
 	// Initialize handlers
 	uiHandler := handlers.NewUIHandler(oidcProvider, sessionManager, apiKeyManager, cfg)
-	proxyHandler, err := handlers.NewProxyHandler(cfg.BackendURL, apiKeyManager, metrics)
+	proxyHandler, err := handlers.NewProxyHandler(cfg.BackendURL, apiKeyManager, metrics, limiter)
 	if err != nil {
 		log.Fatalf("Failed to create proxy handler: %v", err)
 	}

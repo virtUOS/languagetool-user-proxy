@@ -9,6 +9,7 @@ A fast and lightweight HTTP proxy for LanguageTool with OIDC authentication and 
 - **Simple UI**: Single-page dashboard with pure HTML/CSS
 - **API Key Regeneration**: Users can regenerate their API key at any time
 - **Reverse Proxy**: Proxies requests to LanguageTool backend with API key validation
+- **Per-Key Rate Limiting**: Each API key has an independent token bucket (default: 5 req/s, burst 10)
 
 ## Quick Start
 
@@ -87,6 +88,7 @@ curl -si \
 - API keys are stored as SHA-256 hashes (never plain text)
 - Sessions use secure, HTTP-only cookies
 - Session expiration with auto-extend
+- Per-key rate limiting protects the backend from individual key abuse (429 with `Retry-After` header)
 - HTTPS should be handled by a reverse proxy (Caddy, Nginx)
 
 ## Building for Production

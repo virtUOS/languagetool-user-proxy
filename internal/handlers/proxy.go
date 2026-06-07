@@ -9,15 +9,17 @@ import (
 
 	"github.com/virtuos/languagetool-user-proxy/internal/apikey"
 	"github.com/virtuos/languagetool-user-proxy/internal/metrics"
+	"github.com/virtuos/languagetool-user-proxy/internal/ratelimit"
 )
 
 type ProxyHandler struct {
 	BackendURL    *url.URL
 	APIKeyManager *apikey.Manager
 	Metrics       *metrics.Metrics
+	RateLimiter   *ratelimit.Store
 }
 
-func NewProxyHandler(backendURL string, apiKeyManager *apikey.Manager, metrics *metrics.Metrics) (*ProxyHandler, error) {
+func NewProxyHandler(backendURL string, apiKeyManager *apikey.Manager, metrics *metrics.Metrics, limiter *ratelimit.Store) (*ProxyHandler, error) {
 	backend, err := url.Parse(backendURL)
 	if err != nil {
 		return nil, err
@@ -27,6 +29,7 @@ func NewProxyHandler(backendURL string, apiKeyManager *apikey.Manager, metrics *
 		BackendURL:    backend,
 		APIKeyManager: apiKeyManager,
 		Metrics:       metrics,
+		RateLimiter:   limiter,
 	}, nil
 }
 
@@ -49,6 +52,13 @@ func (h *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Invalid API key: %v", err)
 		http.Error(w, "Invalid API key", http.StatusUnauthorized)
+		return
+	}
+
+	// Check rate limit for this API key
+	if h.RateLimiter != nil && !h.RateLimiter.Allow(key) {
+		w.Header().Set("Retry-After", "1")
+		http.Error(w, "Too many requests", http.StatusTooManyRequests)
 		return
 	}
 

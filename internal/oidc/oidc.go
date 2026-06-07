@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -196,7 +197,9 @@ func (p *Provider) GetOrCreateUser(ctx context.Context, userInfo *UserInfo) (*qu
 
 func generateState() string {
 	b := make([]byte, 16)
-	rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		log.Fatalf("Failed to generate random state: %v", err)
+	}
 	return hex.EncodeToString(b)
 }
 

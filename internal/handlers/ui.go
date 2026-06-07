@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/virtuos/languagetool-user-proxy/internal/apikey"
@@ -99,7 +99,8 @@ func (h *UIHandler) RegenerateKey(w http.ResponseWriter, r *http.Request) {
 
 	newKey, err := h.APIKeyManager.RegenerateAPIKey(ctx, sess.Session.UserID)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to regenerate key: %v", err), http.StatusInternalServerError)
+		log.Printf("Failed to regenerate API key for user %d: %v", sess.Session.UserID, err)
+		http.Error(w, "Failed to regenerate key", http.StatusInternalServerError)
 		return
 	}
 

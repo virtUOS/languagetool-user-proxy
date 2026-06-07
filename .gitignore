@@ -1,5 +1,9 @@
 /server
+/languagetool-user-proxy
 .prompts
 .env
 *.swp
 languagetool.db
+node_modules/
+test-results/
+plans/

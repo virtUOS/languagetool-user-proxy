@@ -88,7 +88,7 @@ func main() {
 	}
 
 	// Initialize session manager
-	sessionManager := session.NewManager(queries, cfg.SessionDuration, cfg.CookieSecret)
+	sessionManager := session.NewManager(queries, cfg.SessionDuration, cfg.CookieSecret, cfg.CookieSecure)
 
 	// Clean up expired sessions
 	ctx := context.Background()

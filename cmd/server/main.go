@@ -139,14 +139,16 @@ func main() {
 	r.Get("/callback", func(w http.ResponseWriter, r *http.Request) {
 		result := oidcProvider.CallbackHandler(w, r)
 		if result.Error != nil {
-			http.Error(w, result.Error.Error(), http.StatusUnauthorized)
+			log.Printf("OIDC callback error: %v", result.Error)
+			http.Error(w, "Authentication failed", http.StatusUnauthorized)
 			return
 		}
 
 		ctx := r.Context()
 		user, err := oidcProvider.GetOrCreateUser(ctx, result.UserInfo)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Printf("Failed to get or create user: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 
@@ -159,7 +161,8 @@ func main() {
 		// Create session
 		token, err := sessionManager.CreateSession(ctx, user.ID, result.IDToken)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Printf("Failed to create session: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 

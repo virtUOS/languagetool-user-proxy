@@ -91,6 +91,14 @@ func (m *Manager) DeleteSession(ctx context.Context, sessionID int64) error {
 	return m.Queries.DeleteSession(ctx, sessionID)
 }
 
+func (m *Manager) DeleteSessionsByOIDCSub(ctx context.Context, sub string) (int64, error) {
+	n, err := m.Queries.DeleteSessionsByOIDCSub(ctx, sub)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete sessions: %w", err)
+	}
+	return n, nil
+}
+
 func (m *Manager) CleanupExpiredSessions(ctx context.Context) (int64, error) {
 	result, err := m.Queries.DeleteExpiredSessions(ctx)
 	if err != nil {

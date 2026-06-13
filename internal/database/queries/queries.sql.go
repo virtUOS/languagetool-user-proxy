@@ -151,6 +151,19 @@ func (q *Queries) DeleteSession(ctx context.Context, id int64) error {
 	return err
 }
 
+const deleteSessionsByOIDCSub = `-- name: DeleteSessionsByOIDCSub :execrows
+DELETE FROM sessions
+WHERE user_id = (SELECT id FROM users WHERE oidc_sub = ?)
+`
+
+func (q *Queries) DeleteSessionsByOIDCSub(ctx context.Context, oidcSub string) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteSessionsByOIDCSub, oidcSub)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const getAPIKeyByHash = `-- name: GetAPIKeyByHash :one
 SELECT id, user_id, key_hash, key_prefix, created_at, expires_at FROM api_keys
 WHERE key_hash = ?

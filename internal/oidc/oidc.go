@@ -203,6 +203,44 @@ func generateState() string {
 	return hex.EncodeToString(b)
 }
 
+// ValidateLogoutToken verifies a back-channel logout token and returns the subject claim.
+// It rejects tokens that contain a nonce or lack the required backchannel-logout event.
+func (p *Provider) ValidateLogoutToken(ctx context.Context, rawToken string) (string, error) {
+	verifier := p.Provider.Verifier(&oidc.Config{
+		ClientID:        p.Config.OIDCClientID,
+		SkipExpiryCheck: true,
+	})
+
+	token, err := verifier.Verify(ctx, rawToken)
+	if err != nil {
+		return "", fmt.Errorf("failed to verify logout token: %w", err)
+	}
+
+	var claims struct {
+		Nonce  string                     `json:"nonce"`
+		Events map[string]json.RawMessage `json:"events"`
+		Sub    string                     `json:"sub"`
+	}
+	if err := token.Claims(&claims); err != nil {
+		return "", fmt.Errorf("failed to parse logout token claims: %w", err)
+	}
+
+	if claims.Nonce != "" {
+		return "", fmt.Errorf("logout token must not contain nonce")
+	}
+
+	const backchannelLogoutEvent = "http://schemas.openid.net/event/backchannel-logout"
+	if _, ok := claims.Events[backchannelLogoutEvent]; !ok {
+		return "", fmt.Errorf("logout token missing required backchannel-logout event")
+	}
+
+	if claims.Sub == "" {
+		return "", fmt.Errorf("logout token missing sub claim")
+	}
+
+	return claims.Sub, nil
+}
+
 // GetLogoutURL generates the URL to redirect to for OIDC logout
 // It includes the id_token_hint and post_logout_redirect_uri
 // Returns empty string if end_session_endpoint is not configured

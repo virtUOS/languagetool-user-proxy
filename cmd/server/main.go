@@ -127,6 +127,7 @@ func main() {
 	r.Get("/", uiHandler.Dashboard)
 	r.Post("/logout", uiHandler.Logout)
 	r.Post("/regenerate-key", uiHandler.RegenerateKey)
+	r.Post("/backchannel-logout", uiHandler.BackchannelLogout)
 
 	// Metrics endpoint - must be defined before proxy handler
 	metricsHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

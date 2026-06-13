@@ -56,6 +56,10 @@ WHERE id = ?;
 DELETE FROM sessions
 WHERE expires_at < CURRENT_TIMESTAMP;
 
+-- name: DeleteSessionsByOIDCSub :execrows
+DELETE FROM sessions
+WHERE user_id = (SELECT id FROM users WHERE oidc_sub = ?);
+
 -- name: ListSessionsByUserID :many
 SELECT * FROM sessions
 WHERE user_id = ?

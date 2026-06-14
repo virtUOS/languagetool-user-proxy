@@ -322,6 +322,19 @@ const dashboardHTML = `<!DOCTYPE html>
             font-family: 'Courier New', monospace;
             border-left: 2px solid gray;
         }
+        @media (max-width: 480px) {
+            body {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            .container {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            .user-bar {
+                margin-right: -10px;
+            }
+        }
     </style>
 </head>
 <body>

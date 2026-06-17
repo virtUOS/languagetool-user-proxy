@@ -111,6 +111,19 @@ func (h *UIHandler) RegenerateKey(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *UIHandler) SessionStatus(w http.ResponseWriter, r *http.Request) {
+	token := h.SessionManager.GetTokenFromRequest(r)
+	if token == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if _, err := h.SessionManager.GetSessionByToken(r.Context(), token); err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func (h *UIHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Redirect(w, r, "/", http.StatusFound)
@@ -407,6 +420,13 @@ const dashboardHTML = `<!DOCTYPE html>
     </div>
 
     <script>
+        setInterval(function () {
+            if (document.hidden) return;
+            fetch('/session/status')
+                .then(function (r) { if (!r.ok) window.location.href = '/login'; })
+                .catch(function () {});
+        }, 5000);
+
         function handleRegenerate() {
             if (!confirm('Generating a new API key will invalidate your current key. Continue?')) {
                 return;

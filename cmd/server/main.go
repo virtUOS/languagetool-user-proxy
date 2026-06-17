@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -24,6 +25,7 @@ import (
 	"github.com/virtuos/languagetool-user-proxy/internal/oidc"
 	"github.com/virtuos/languagetool-user-proxy/internal/ratelimit"
 	"github.com/virtuos/languagetool-user-proxy/internal/session"
+	webui "github.com/virtuos/languagetool-user-proxy/web"
 )
 
 // basicAuthMiddleware returns a middleware that checks for basic auth credentials
@@ -47,8 +49,9 @@ func basicAuthMiddleware(username, password string) func(next http.Handler) http
 }
 
 func main() {
-	// Define --env-path flag
+	// Define flags
 	envPath := flag.String("env-path", ".env", "Path to the environment file")
+	uiDir := flag.String("ui-dir", "", "Serve UI templates from this directory instead of embedded (for development)")
 	flag.Parse()
 
 	// Load environment file from specified path (optional - won't error if not found)
@@ -105,8 +108,17 @@ func main() {
 	// Initialize rate limiter
 	limiter := ratelimit.NewStore(cfg.RateLimitRPS, cfg.RateLimitBurst)
 
+	// Select UI template source: disk (dev) or embedded (production)
+	var templateFS fs.FS
+	if *uiDir != "" {
+		log.Printf("Dev mode: serving UI templates from disk at %s", *uiDir)
+		templateFS = os.DirFS(*uiDir)
+	} else {
+		templateFS = webui.FS
+	}
+
 	// Initialize handlers
-	uiHandler := handlers.NewUIHandler(oidcProvider, sessionManager, apiKeyManager, cfg)
+	uiHandler := handlers.NewUIHandler(oidcProvider, sessionManager, apiKeyManager, cfg, templateFS)
 	proxyHandler, err := handlers.NewProxyHandler(cfg.BackendURL, apiKeyManager, metrics, limiter)
 	if err != nil {
 		log.Fatalf("Failed to create proxy handler: %v", err)

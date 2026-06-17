@@ -6,7 +6,7 @@ A fast and lightweight HTTP proxy for LanguageTool with OIDC authentication and 
 
 - **OIDC Authentication**: Login via any OpenID Connect provider (Keycloak, Dex, Auth0, etc.)
 - **Per-User API Keys**: Each user gets a unique 64-character API key
-- **Simple UI**: Single-page dashboard with pure HTML/CSS
+- **Simple UI**: Single-page dashboard served from an embedded `web/templates/` folder
 - **API Key Regeneration**: Users can regenerate their API key at any time
 - **Reverse Proxy**: Proxies requests to LanguageTool backend with API key validation
 - **Per-Key Rate Limiting**: Each API key has an independent token bucket (default: 5 req/s, burst 10)
@@ -35,6 +35,13 @@ cp .env.example .env
 ```
 
 The server will automatically load the `.env` file if it exists in the current directory.
+
+### CLI Flags
+
+| Flag         | Default       | Description                                                          |
+| ------------ | ------------- | -------------------------------------------------------------------- |
+| `--env-path` | `.env`        | Path to the environment file                                         |
+| `--ui-dir`   | *(embedded)*  | Serve UI templates from this directory instead of the embedded copy  |
 
 ## Usage
 
@@ -113,6 +120,21 @@ CMD ["./server"]
 ```bash
 go build -o languagetool-user-proxy cmd/server/main.go
 ```
+
+## Development
+
+### Live UI editing
+
+To modify the dashboard without rebuilding the binary, pass `--ui-dir` pointing at the
+`web/` directory. The template is read from disk on every request, so a browser reload
+picks up changes immediately:
+
+```bash
+./languagetool-proxy --ui-dir ./web
+```
+
+The template lives at `web/templates/dashboard.html` and uses standard Go template
+syntax (`{{.Field}}`).
 
 ## License
 

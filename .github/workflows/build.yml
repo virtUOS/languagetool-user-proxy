@@ -30,22 +30,26 @@ jobs:
       - name: Run binary
         run: ./languagetool-user-proxy --help
 
-      - name: Uncompress DeX OIDC provider
-        run: xz --decompress .github/testdata/dex.xz
-
-      - name: Start DeX OIDC provider
-        working-directory: .github/testdata
-        run: ./dex serve dex-config-languagetool.yaml &
+      - name: Start OIDC provider
+        run: pipx run oidc-provider-mock --user lars &
 
       - name: Start backend
         run: ./.github/testdata/backend &
 
+      - name: Wait for OIDC provider
+        run: |
+          timeout 60 bash -c 'until curl -sf http://127.0.0.1:9400/.well-known/openid-configuration; do sleep 1; done'
+
+      - name: Wait for backend (LanguageTool mock)
+        run: |
+          timeout 30 bash -c 'until curl -sf -X POST http://127.0.0.1:8000/v2/check; do sleep 1; done'
+
+
       - name: Start LanguageTool proxy
         run: ./languagetool-user-proxy --env-path .github/testdata/env &
 
-      - name: Wait for services to be ready
+      - name: Wait for LanguageTool proxy
         run: |
-          timeout 30 bash -c 'until curl -sf http://127.0.0.1:5556/dex/.well-known/openid-configuration; do sleep 1; done'
           timeout 30 bash -c 'until curl -sf http://127.0.0.1:8080; do sleep 1; done'
 
       - name: Setup Node.js

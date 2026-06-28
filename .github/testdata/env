@@ -10,9 +10,9 @@ DATABASE_PATH=./languagetool.db
 
 # OIDC Configuration (Required)
 # Replace with your OIDC provider settings
-OIDC_ISSUER_URL=http://127.0.0.1:5556/dex
+OIDC_ISSUER_URL=http://127.0.0.1:9400
 OIDC_CLIENT_ID=example-app
-OIDC_CLIENT_SECRET=ZXhhbXBsZS1hcHAtc2VjcmV0
+OIDC_CLIENT_SECRET=secret
 OIDC_REDIRECT_URI=http://127.0.0.1:8080/callback
 
 # Optional: OIDC scopes (default: openid profile email)

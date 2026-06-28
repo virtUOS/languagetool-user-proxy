@@ -1,4 +1,11 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
+
+async function login(page: Page): Promise<void> {
+  await page.goto('/');
+  await page.waitForURL(/\/oauth2\/authorize/);
+  await page.click('button[name="sub"]');
+  await page.waitForURL('http://127.0.0.1:8080/');
+}
 
 test('metrics endpoint requires auth and returns prometheus data', async ({ request }) => {
   const unauthed = await request.get('http://127.0.0.1:8080/metrics');
@@ -13,19 +20,7 @@ test('metrics endpoint requires auth and returns prometheus data', async ({ requ
 });
 
 test('login, use API key, regenerate, verify', async ({ page, request }) => {
-  await page.goto('/');
-  await page.waitForURL(/5556\/dex/);
-
-  await page.fill('input[name="login"]', 'test@example.com');
-  await page.fill('input[name="password"]', 'test');
-  await page.click('button[type="submit"]');
-
-  const grantButton = page.locator('button:has-text("Grant Access")');
-  if (await grantButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await grantButton.click();
-  }
-
-  await page.waitForURL('http://127.0.0.1:8080/');
+  await login(page);
 
   // Each regeneration triggers two dialogs in sequence:
   // 1. confirm() fires synchronously on click — handled inside Promise.all
@@ -71,19 +66,7 @@ test('login, use API key, regenerate, verify', async ({ page, request }) => {
 });
 
 test('rate limiting returns 429 after burst is exceeded', async ({ page, request }) => {
-  await page.goto('/');
-  await page.waitForURL(/5556\/dex/);
-
-  await page.fill('input[name="login"]', 'test@example.com');
-  await page.fill('input[name="password"]', 'test');
-  await page.click('button[type="submit"]');
-
-  const grantButton = page.locator('button:has-text("Grant Access")');
-  if (await grantButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await grantButton.click();
-  }
-
-  await page.waitForURL('http://127.0.0.1:8080/');
+  await login(page);
 
   // Regenerate to get a fresh key with a full burst bucket
   const [resp] = await Promise.all([

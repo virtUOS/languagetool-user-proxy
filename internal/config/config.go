@@ -35,7 +35,6 @@ type Config struct {
 	OIDCClientID     string
 	OIDCClientSecret string
 	OIDCRedirectURI  string
-	OIDCScope        string
 
 	// Backend
 	BackendURL string
@@ -76,7 +75,6 @@ func Load() *Config {
 		OIDCClientID:         getEnv("OIDC_CLIENT_ID", ""),
 		OIDCClientSecret:     getEnv("OIDC_CLIENT_SECRET", ""),
 		OIDCRedirectURI:      getEnv("OIDC_REDIRECT_URI", ""),
-		OIDCScope:            getEnv("OIDC_SCOPE", "openid profile email"),
 		BackendURL:           getEnv("BACKEND_URL", "http://localhost:8080"),
 		FrontendURL:          getEnv("FRONTEND_URL", "https://languagetool.example.com"),
 		SessionDuration:      time.Duration(getEnvDuration("SESSION_DURATION_HOURS", 24)) * time.Hour,
